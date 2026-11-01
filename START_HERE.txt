@@ -1,0 +1,19 @@
+INFOTEX — HUMAN INTELLIGENCE (HI)
+
+1. Extract the ZIP and open the HI folder.
+2. Install/start Docker Desktop (Linux containers / WSL2).
+3. Open a terminal in HI:
+   python scripts/setup.py
+   docker compose up --build -d
+4. Open http://localhost:8080
+5. Create your own account. No API key is needed in demo mode.
+6. Create a project, open Intelligence studio, and use the technical-event example.
+
+Windows alternative: run Start-HI.ps1 if allowed by your computer's policy.
+Do not disable your computer's security policy to run it.
+
+Read README.md for local Linux/WSL instructions, API configuration and troubleshooting.
+Read docs/TESTING.md for what was and was not verified.
+
+This is a functional product prototype. Public browser pages were checked. Authenticated browser end-to-end testing,
+Docker/PostgreSQL runtime and credentialed live AI calls remain unverified.

@@ -1,0 +1,242 @@
+/* INFOTEX HI — Project Details Refinement
+   Carefully scoped to the existing "Project details" route.
+   All five Theme Studio palettes are respected; no other page is changed.
+*/
+html[data-hi-theme="blue"] .hi-project-polish {
+  --hi-p-bg: linear-gradient(150deg, rgba(22,66,139,.88), rgba(5,20,59,.95));
+  --hi-p-line: rgba(125,185,255,.45);
+  --hi-p-text: #f3f8ff;
+  --hi-p-muted: #c2d5f5;
+  --hi-p-accent: #56acff;
+  --hi-p-warm: #f14658;
+  --hi-p-inset: rgba(9,34,85,.64);
+  --hi-p-shadow: 0 9px 26px rgba(0,9,35,.23);
+  --hi-p-radius: 16px;
+}
+html[data-hi-theme]:not([data-hi-theme="blue"]) .hi-project-polish {
+  --hi-p-bg: var(--ht-card);
+  --hi-p-line: var(--ht-line);
+  --hi-p-text: var(--ht-text);
+  --hi-p-muted: var(--ht-muted);
+  --hi-p-accent: var(--ht-accent);
+  --hi-p-warm: var(--ht-warm);
+  --hi-p-inset: var(--ht-card-alt);
+  --hi-p-shadow: 0 8px 24px var(--ht-shadow);
+  --hi-p-radius: var(--ht-radius, 14px);
+}
+.hi-project-polish {
+  min-width: 0;
+  overflow-x: clip;
+}
+.hi-project-polish > * { min-width: 0; }
+.hi-project-polish .page-head {
+  margin-bottom: 20px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.hi-project-polish .page-head > div { min-width: 0; max-width: 100%; }
+.hi-project-polish .page-head h1 {
+  font-size: clamp(25px, 2.4vw, 34px) !important;
+  overflow-wrap: anywhere;
+}
+.hi-project-polish .page-head p {
+  max-width: 70ch;
+  line-height: 1.55;
+}
+.hi-project-polish .stats-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.hi-project-polish .stat {
+  min-width: 0;
+  min-height: 136px;
+  padding: 18px 19px !important;
+  border: 1px solid var(--hi-p-line) !important;
+  border-radius: var(--hi-p-radius) !important;
+  background: var(--hi-p-bg) !important;
+  box-shadow: var(--hi-p-shadow) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+.hi-project-polish .stat::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 3px;
+  background: linear-gradient(90deg,var(--hi-p-accent),transparent 66%,var(--hi-p-warm));
+}
+.hi-project-polish .stat:nth-child(2n)::before {
+  background: linear-gradient(90deg,var(--hi-p-warm),transparent 62%,var(--hi-p-accent));
+}
+.hi-project-polish .stat > span {
+  font-size: 12px !important;
+  font-weight: 600;
+  color: var(--hi-p-muted) !important;
+  line-height: 1.4;
+}
+.hi-project-polish .stat strong {
+  margin: 8px 0 6px;
+  line-height: 1;
+  font-size: clamp(25px, 2.3vw, 34px);
+  font-weight: 750;
+  color: var(--hi-p-text) !important;
+}
+.hi-project-polish .stat small {
+  color: var(--hi-p-muted) !important;
+  font-size: 11px !important;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.hi-project-polish .two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 18px;
+}
+.hi-project-polish .two-column > .panel { align-self: stretch; }
+.hi-project-polish .panel {
+  min-width: 0;
+  margin-bottom: 20px;
+  background: var(--hi-p-bg) !important;
+  color: var(--hi-p-text) !important;
+  border: 1px solid var(--hi-p-line) !important;
+  border-radius: var(--hi-p-radius) !important;
+  box-shadow: var(--hi-p-shadow) !important;
+  overflow: hidden;
+}
+.hi-project-polish .panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 18px !important;
+  background: var(--hi-p-inset) !important;
+  color: var(--hi-p-text) !important;
+  border-color: var(--hi-p-line) !important;
+}
+.hi-project-polish .panel-head h3 {
+  color: var(--hi-p-text) !important;
+  font-size: 12px !important;
+  letter-spacing: .08em;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+.hi-project-polish .panel-head .text-button {
+  font-size: 11px;
+  font-weight: 650;
+  white-space: normal;
+  text-align: right;
+  color: var(--hi-p-text) !important;
+}
+.hi-project-polish .panel-body {
+  padding: 18px !important;
+  color: var(--hi-p-text) !important;
+  background: transparent !important;
+}
+.hi-project-polish .progress-track {
+  height: 8px;
+  border-radius: 999px;
+  margin: 2px 0 17px;
+  background: var(--hi-p-inset) !important;
+  border: 1px solid var(--hi-p-line);
+  overflow: hidden;
+}
+.hi-project-polish .progress-track > span {
+  min-width: 0;
+  max-width: 100%;
+  background: linear-gradient(90deg,var(--hi-p-accent),var(--hi-p-warm)) !important;
+}
+.hi-project-polish .metric-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 45px;
+  margin: 0 0 9px;
+  padding: 9px 12px !important;
+  background: var(--hi-p-inset) !important;
+  color: var(--hi-p-text) !important;
+  border: 1px solid var(--hi-p-line) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+.hi-project-polish .metric-row:last-child { margin-bottom: 0; }
+.hi-project-polish .metric-row strong {
+  margin-left: auto;
+  color: var(--hi-p-text) !important;
+  font-size: 13px;
+}
+.hi-project-polish .metric-row .badge {
+  font-weight: 650;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.hi-project-polish .memory-list {
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.hi-project-polish .memory-list > div {
+  background: var(--hi-p-inset);
+  border: 1px solid var(--hi-p-line);
+  border-radius: 10px;
+  padding: 12px;
+}
+.hi-project-polish .memory-list p {
+  color: var(--hi-p-text) !important;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.hi-project-polish .memory-list .muted {
+  margin: auto 0;
+  text-align: center;
+  padding: 25px 14px;
+  color: var(--hi-p-muted) !important;
+  font-size: 12px;
+}
+.hi-project-polish .memory-list small { color: var(--hi-p-muted) !important; }
+.hi-project-polish .table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  background: transparent !important;
+}
+.hi-project-polish .table-wrap table { width: 100%; min-width: 525px; }
+.hi-project-polish .table-wrap th,
+.hi-project-polish .table-wrap td {
+  padding: 14px 17px;
+  border-color: var(--hi-p-line) !important;
+}
+.hi-project-polish .table-wrap td,
+.hi-project-polish .table-wrap th { overflow-wrap: anywhere; }
+.hi-project-polish .table-wrap .empty { margin: 10px 15px 15px; }
+
+/* Real viewport responsiveness: readable stats and zero sideways page overflow. */
+@media (max-width: 1480px) {
+  .hi-project-polish .stats-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 1120px) {
+  .hi-project-polish .two-column { grid-template-columns: minmax(0,1fr); }
+  .hi-project-polish .memory-list { min-height: 155px; }
+}
+@media (max-width: 690px) {
+  .hi-project-polish { padding: 17px 15px !important; }
+  .hi-project-polish .stats-grid { gap: 10px; }
+  .hi-project-polish .stat { min-height: 120px; padding: 14px !important; }
+  .hi-project-polish .stat strong { font-size: 25px; }
+  .hi-project-polish .stat small { font-size: 10px !important; }
+  .hi-project-polish .panel-body { padding: 13px !important; }
+}
+@media (max-width: 420px) {
+  .hi-project-polish .stats-grid { grid-template-columns: minmax(0,1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hi-project-polish .stat, .hi-project-polish .panel { transition: none !important; }
+}

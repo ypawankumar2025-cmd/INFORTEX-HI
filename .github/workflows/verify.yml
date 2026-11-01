@@ -1,0 +1,33 @@
+name: Verify HI
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install C++ dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ cmake libasio-dev libssl-dev libcurl4-openssl-dev libsqlite3-dev libpq-dev nlohmann-json3-dev libarchive-dev poppler-utils
+      - name: Build and verify C++ and SQLite
+        run: |
+          cmake -S backend -B build -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build -j2
+          ctest --test-dir build --output-on-failure
+          python3 scripts/run-local-tests.py
+          python3 scripts/test-provider-transport.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Verify frontend
+        run: |
+          npm --prefix frontend ci
+          npm --prefix frontend test
+          npm --prefix frontend run build
+      - name: Build Docker and verify PostgreSQL
+        run: python3 scripts/test-compose.py

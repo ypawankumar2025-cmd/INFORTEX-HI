@@ -1,0 +1,377 @@
+/*
+ * INFOTEX HI / CINEMATIC GLASS EVERYWHERE v4
+ * Presentation only: no React component, routing, API or database changes.
+ * Exact visual palette: #021861 midnight / #255DCE cobalt / #DE1110 red.
+ * Must load LAST after the existing themes.
+ */
+:root {
+  --hi-midnight: #021861;
+  --hi-cobalt: #255dce;
+  --hi-red: #de1110;
+  --hi-ice: #f4f8ff;
+  --hi-glass-bg: linear-gradient(143deg, rgba(52,113,211,.33) 0%, rgba(10,39,104,.49) 42%, rgba(4,19,58,.67) 100%);
+  --hi-glass-bg-hover: linear-gradient(136deg, rgba(70,139,240,.49), rgba(15,53,132,.57) 58%,rgba(54,28,86,.44));
+  --hi-glass-line: rgba(150,204,255,.35);
+  --hi-glass-line-hot: rgba(177,222,255,.66);
+  --hi-glass-shine: inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(98,155,255,.13);
+  --hi-glass-shadow: 0 15px 40px rgba(1,7,29,.37);
+  --hi-glass-blur: blur(19px) saturate(150%);
+}
+
+/* 01 — Cinema-grade navy depth and ambient blue/red lighting. */
+html,body,.app-shell { color:var(--hi-ice); background:#030b27; }
+.main-shell {
+  background:
+    radial-gradient(ellipse 50% 33% at 81% 12%,rgba(37,93,206,.29),transparent 80%),
+    radial-gradient(ellipse 34% 42% at 82% 76%,rgba(222,17,16,.11),transparent 80%),
+    linear-gradient(150deg,#021337 1%,#041b50 49%,#020a23 100%);
+}
+/* Remove competing flower wallpaper on work pages, while preserving the vivid floral dashboard banner. */
+.main-shell::before {
+  background:
+    radial-gradient(ellipse 44% 36% at 73% 26%,rgba(56,130,255,.23),transparent 78%),
+    radial-gradient(ellipse 32% 27% at 96% 81%,rgba(222,17,16,.12),transparent 84%);
+  opacity:.78;
+  animation:none;
+}
+.main-content { position:relative; isolation:isolate; }
+.main-content::before {display:none;}
+::selection {background:rgba(222,17,16,.8);color:white;}
+
+/* 02 — Frosted full-height sidebar. Every navigation item is its own glass tile. */
+.sidebar {
+  background:linear-gradient(170deg,rgba(2,24,97,.91) 0%,rgba(3,20,68,.88) 50%,rgba(2,9,37,.94) 100%);
+  border-right:1px solid rgba(105,174,255,.46);
+  box-shadow:inset -1px 0 0 rgba(255,255,255,.08), 11px 0 44px rgba(0,5,31,.32);
+  backdrop-filter:blur(25px) saturate(140%);
+  -webkit-backdrop-filter:blur(25px) saturate(140%);
+}
+.sidebar::after {
+  background:linear-gradient(90deg,#de1110 0 24%,#f95c6b 24% 31%,#255dce 31% 100%);
+  height:4px;
+  box-shadow:0 1px 14px rgba(239,44,70,.38);
+}
+.sidebar > .brand {margin-bottom:22px;}
+.sidebar nav {gap:6px; padding:1px 0 4px;}
+.sidebar nav button {
+  isolation:isolate;
+  min-height:39px;
+  border-radius:12px;
+  border:1px solid rgba(130,185,255,.22);
+  background:linear-gradient(110deg,rgba(56,108,199,.20),rgba(34,74,150,.17) 65%,rgba(9,26,74,.29));
+  color:#e4eeff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 4px 15px rgba(0,7,37,.13);
+  backdrop-filter:blur(11px) saturate(140%);
+  -webkit-backdrop-filter:blur(11px) saturate(140%);
+  transition:background .22s ease,border-color .22s ease,box-shadow .22s ease,transform .22s ease;
+}
+.sidebar nav button svg {color:#c2ddff;filter:drop-shadow(0 0 4px rgba(82,169,255,.25));}
+.sidebar nav button:hover:not(.active) {
+  transform:translateX(2px);
+  background:var(--hi-glass-bg-hover);
+  border-color:rgba(166,215,255,.70);
+  box-shadow:var(--hi-glass-shine), 0 0 20px rgba(37,93,206,.20);
+  color:#fff;
+}
+.sidebar nav button.active {
+  color:white;
+  border:1px solid rgba(160,211,255,.73);
+  border-left-color:rgba(255,94,112,.88);
+  background:linear-gradient(106deg,rgba(37,93,206,.80),rgba(21,67,158,.63) 70%,rgba(110,27,80,.37));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 0 18px rgba(37,93,206,.30),-2px 0 15px rgba(222,17,16,.14);
+}
+.sidebar nav button.active::before {
+  left:-16px;top:6px;bottom:6px;width:3px;border-radius:4px;
+  background:#ff3553;box-shadow:0 0 12px rgba(222,17,16,.85);
+}
+.sidebar nav button.active svg {color:white;}
+.sidebar .nav-new {
+  background:linear-gradient(120deg,#de1110,#fd4960);
+  border:1px solid rgba(255,170,178,.6);color:#fff;
+  box-shadow:0 0 13px rgba(222,17,16,.3);
+  border-radius:5px;
+}
+.workspace-picker,.sidebar .mode-card,.sidebar-bottom .user-bar {
+  background:var(--hi-glass-bg);
+  border:1px solid var(--hi-glass-line);
+  border-radius:13px;
+  box-shadow:var(--hi-glass-shine),0 9px 19px rgba(0,10,38,.16);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.sidebar-bottom .user-bar {padding:11px;margin-bottom:10px;}
+.workspace-picker:hover,.mode-card:hover {border-color:var(--hi-glass-line-hot);}
+.workspace-avatar {background:linear-gradient(150deg,#237dff,#1c429d);border:1px solid rgba(166,215,255,.55);color:#fff;}
+.nav-label {color:#bfd4ff;letter-spacing:2.1px;}
+.nav-divider {background:linear-gradient(90deg,transparent,rgba(109,164,255,.4),transparent);}
+.notification-dot {background:#ff3151;box-shadow:0 0 11px rgba(222,17,16,.7);}
+
+/* 03 — Glass heading bar, nav breadcrumbs and content framing. */
+.topbar {
+  background:linear-gradient(100deg,rgba(3,18,58,.70),rgba(5,32,88,.45));
+  border-bottom:1px solid rgba(133,186,255,.34);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.11);
+  backdrop-filter:blur(21px) saturate(137%);
+  -webkit-backdrop-filter:blur(21px) saturate(137%);
+}
+.page-head {position:relative;}
+.page-head .eyebrow {color:#b7d3ff;letter-spacing:2.1px;}
+.page-head .eyebrow::after {content:"";display:block;width:36px;height:2px;margin-top:9px;background:linear-gradient(90deg,#ff3b59,transparent);box-shadow:0 0 8px rgba(222,17,16,.3);}
+.page-head h1 {color:#fff;text-shadow:0 4px 19px rgba(5,19,53,.3);}
+.page-head p {color:#c0cfee;}
+
+/* 04 — One consistent frosted-glass surface system for ALL workspace pages. */
+:where(.panel,.stat,.project-card,.agent-card,.kanban-column,.task-card,.search-inline,
+       .search-bar,.project-ai-toolbar,.hi-chat-shell,.hi-chat-welcome,.auth-card,
+       .modal,.mini-agent,.notification-row,.risk-box,.review-box,.studio-mark,
+       .studio-empty,.run-history,.empty,.search-result,.mode-card,.metric-row) {
+  background:var(--hi-glass-bg);
+  border:1px solid var(--hi-glass-line);
+  border-radius:16px;
+  box-shadow:var(--hi-glass-shine),var(--hi-glass-shadow);
+  backdrop-filter:var(--hi-glass-blur);
+  -webkit-backdrop-filter:var(--hi-glass-blur);
+}
+/* Higher specificity than the base and previous theme layers. */
+.panel,.stat,.project-card,.agent-card,.kanban-column,.task-card,.modal,.auth-card,
+.project-ai-toolbar,.hi-chat-shell,.mini-agent,.search-inline,.studio-mark,.review-box,
+.risk-box,.empty,.search-bar {
+  background:var(--hi-glass-bg);
+  border:1px solid var(--hi-glass-line);
+  border-radius:16px;
+  box-shadow:var(--hi-glass-shine),var(--hi-glass-shadow);
+  backdrop-filter:var(--hi-glass-blur);
+  -webkit-backdrop-filter:var(--hi-glass-blur);
+}
+.panel,.project-card,.agent-card,.stat,.kanban-column,.modal,.hi-chat-shell {isolation:isolate;}
+/* Blue and subtle red glints INSIDE the large cards, never over labels. */
+.panel,.stat,.project-card,.kanban-column,.agent-card,.hi-chat-shell,.modal,.auth-card {
+  background-image:
+    radial-gradient(ellipse 55% 36% at 95% 0%,rgba(222,17,16,.13),transparent 80%),
+    radial-gradient(ellipse 50% 46% at 5% 0%,rgba(68,154,255,.21),transparent 86%),
+    linear-gradient(147deg,rgba(28,79,164,.39),rgba(6,32,87,.57) 52%,rgba(3,17,49,.78));
+}
+.panel-head {
+  background:linear-gradient(100deg,rgba(46,107,207,.24),rgba(8,33,90,.25));
+  border-bottom:1px solid rgba(151,201,255,.26);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+}
+.panel-head h3 {color:#f5f9ff;}
+.panel-body {background:transparent;}
+.stat {position:relative;overflow:hidden;}
+.stat::before {
+  height:3px;background:linear-gradient(90deg,#255dce 0%,#72bcff 58%,#de1110 92%);
+  box-shadow:0 0 15px rgba(80,154,255,.3);
+}
+.stat strong {color:#fff;}
+.stat>span,.stat small,.project-card p {color:#c1d0ee;}
+.project-card:hover,.stat:hover,.agent-card:hover,.kanban-column:hover {
+  border-color:rgba(182,221,255,.58);
+  box-shadow:var(--hi-glass-shine),0 20px 48px rgba(0,10,40,.50),0 0 18px rgba(37,93,206,.12);
+}
+.project-symbol,.agent-icon,.studio-mark,.workspace-avatar {
+  background:linear-gradient(150deg,rgba(49,122,239,.64),rgba(12,48,129,.66));
+  border:1px solid rgba(155,206,255,.40);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16);
+}
+
+/* 05 — Intelligence Studio, panels, examples, agent lists and shared results. */
+.composer,.proposal-heading,.review-box,.risk-box {position:relative;}
+.composer-head {color:#eaf3ff;}
+.composer textarea {
+  color:#f4f8ff;
+  background:linear-gradient(150deg,rgba(17,52,119,.23),rgba(5,24,73,.22));
+  border:1px solid rgba(150,201,255,.18);
+  border-radius:12px;
+  margin:0 16px;
+  padding:15px;
+  width:calc(100% - 32px);
+  min-height:135px;
+}
+.composer textarea:focus {border-color:rgba(161,208,255,.64);background:rgba(15,48,120,.38);}
+.composer-footer,.side-note {border-top:1px solid rgba(151,201,255,.23);}
+.example-prompt {
+  background:linear-gradient(110deg,rgba(54,110,211,.38),rgba(15,46,114,.44) 76%,rgba(222,17,16,.21));
+  border:1px solid rgba(141,197,255,.56);
+  border-right-color:rgba(255,70,88,.72);
+  border-radius:11px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.15),4px 1px 18px rgba(222,17,16,.09);
+  color:#f1f7ff;
+}
+.composer > .check-field {color:#d5e3ff;}
+.pipeline-agent,.run-history button,.project-row,.document-row,.member-row,.notification-row,
+.activity-item,.metric-row,.search-result,.comment {
+  border-color:rgba(143,191,255,.19);
+}
+.run-history button.active,.run-history button:hover,.project-row:hover {
+  background:rgba(45,104,197,.28);
+  border-radius:11px;
+}
+.request-quote,.review-box,.risk-box,.note {
+  border-color:rgba(153,203,255,.30);
+  background:linear-gradient(130deg,rgba(39,92,183,.20),rgba(8,32,94,.34));
+  border-radius:13px;
+}
+.risk-box {border-left:3px solid rgba(255,72,89,.78);}
+.review-box {border-top:2px solid rgba(104,174,255,.56);}
+
+/* 06 — Transparent forms, pills, tables, analytics, tasks and collaboration. */
+input:not([type="checkbox"]),select,textarea,.search-inline,.search-bar,.invite-code {
+  background:linear-gradient(140deg,rgba(14,48,121,.53),rgba(4,22,70,.68));
+  border:1px solid rgba(155,201,255,.35);
+  border-radius:11px;
+  color:#f4f7ff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+}
+input::placeholder,textarea::placeholder {color:#b3c5e6;}
+input:focus,textarea:focus,select:focus {
+  border-color:rgba(171,217,255,.88);
+  outline:1px solid rgba(112,187,255,.59);
+}
+input[type="checkbox"] {accent-color:#255dce;}
+.table-wrap {
+  border:1px solid rgba(148,200,255,.24);border-radius:13px;
+  background:rgba(5,27,80,.31);
+}
+.table-wrap table {border-collapse:separate;border-spacing:0;}
+th {background:rgba(45,102,197,.21);color:#d5e6ff;}
+td {background:rgba(6,29,89,.13);color:#d8e5fa;}
+th,td {border-bottom:1px solid rgba(153,202,255,.16);}
+.table-wrap tr:hover td {background:rgba(37,93,206,.31);}
+.kanban-column {min-height:300px;}
+.task-card {background:linear-gradient(140deg,rgba(48,104,197,.32),rgba(6,29,80,.71));border-radius:12px;}
+.task-card:hover {border-color:rgba(153,211,255,.62);}
+.progress-track {background:rgba(108,156,235,.22);border-radius:20px;overflow:hidden;}
+.progress-track>span {background:linear-gradient(90deg,#255dce,#5bb5ff);border-radius:20px;}
+.notification-row.unread {background:linear-gradient(115deg,rgba(37,93,206,.30),rgba(222,17,16,.11));}
+
+/* 07 — ChatGPT-style normal & project AI, both with the SAME glass language. */
+.hi-chat-shell {border-radius:19px;}
+.hi-chat-history {
+  background:linear-gradient(164deg,rgba(2,24,97,.48),rgba(5,20,59,.57));
+  border-right:1px solid rgba(166,207,255,.27);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+}
+.hi-chat-main {background:rgba(1,12,45,.16);}
+.hi-chat-transcript {
+  background:radial-gradient(ellipse 70% 55% at 85% 25%,rgba(37,93,206,.12),transparent 85%),
+             linear-gradient(160deg,rgba(3,16,52,.52),rgba(3,10,34,.79));
+}
+.hi-chat-thread {
+  border:1px solid rgba(152,200,255,.23);
+  background:rgba(49,109,202,.13);
+  border-radius:11px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+}
+.hi-chat-thread.selected {
+  background:linear-gradient(106deg,rgba(37,93,206,.78),rgba(22,64,156,.50));
+  border-color:rgba(168,215,255,.56);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.19),0 0 17px rgba(37,93,206,.17);
+}
+.hi-chat-bubble {
+  background:linear-gradient(131deg,rgba(39,90,182,.40),rgba(7,32,88,.73));
+  border:1px solid rgba(158,202,255,.35);
+  border-radius:17px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 12px 29px rgba(0,7,29,.22);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.hi-chat-message.from-user .hi-chat-bubble {
+  background:linear-gradient(120deg,#255dcee8,#1b419ddd 82%,rgba(222,17,16,.52));
+  border-color:rgba(174,216,255,.61);
+}
+.hi-chat-composer {
+  background:linear-gradient(100deg,rgba(8,34,92,.74),rgba(6,21,64,.82));
+  border-top:1px solid rgba(157,200,255,.32);
+  backdrop-filter:blur(15px);
+  -webkit-backdrop-filter:blur(15px);
+}
+.hi-chat-compose-row textarea {
+  background:rgba(6,29,79,.70);
+  border-color:rgba(145,204,255,.45);
+  border-radius:13px;
+}
+.hi-chat-welcome {
+  background:linear-gradient(150deg,rgba(23,71,157,.57),rgba(7,28,78,.80));
+  border:1px solid rgba(169,214,255,.39);
+  border-radius:17px;
+  padding:24px;
+}
+.hi-chat-welcome::before {height:3px;background:linear-gradient(90deg,#de1110,#5899fc);}
+.project-ai-toolbar {
+  background:var(--hi-glass-bg);border:1px solid var(--hi-glass-line);
+  border-radius:14px;box-shadow:var(--hi-glass-shine),0 11px 28px rgba(0,6,30,.18);
+}
+.project-ai-context-pill {color:#deebff;}
+.project-ai-info {color:#c0d3fa;border-color:rgba(169,203,255,.30);}
+
+/* 08 — Glass button system: blue primary, tiny red accents inside. */
+.button,.icon-button,.hi-chat-new,.hi-chat-send {
+  border-radius:12px;
+  transition:transform .22s ease,box-shadow .22s ease,background .22s ease,border-color .22s ease;
+}
+.button:not(.primary):not(.danger),.icon-button {
+  background:linear-gradient(123deg,rgba(45,99,190,.38),rgba(8,31,86,.62));
+  border:1px solid rgba(150,200,255,.34);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+  color:#f5f8ff;
+}
+.button.primary,.hi-chat-new,.hi-chat-send {
+  color:#fff;
+  border:1px solid rgba(178,223,255,.62);
+  background:linear-gradient(113deg,#255dce 0%,#296dd8 72%,#6a316d 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 9px 27px rgba(37,93,206,.28);
+}
+.button:hover:not(:disabled),.hi-chat-new:hover:not(:disabled),.hi-chat-send:hover:not(:disabled) {
+  border-color:rgba(204,230,255,.78);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.26),0 12px 29px rgba(37,93,206,.33);
+}
+.button.danger {background:linear-gradient(115deg,#941428,#de1110);border-color:rgba(255,163,173,.68);}
+.badge.red,.hi-chat-alert,.error,.global-error {
+  background:linear-gradient(120deg,rgba(131,16,33,.91),rgba(76,12,36,.88));
+  border:1px solid rgba(255,78,101,.70);
+  color:#ffe5ea;
+}
+.badge.blue {background:rgba(37,93,206,.38);border-color:rgba(148,196,255,.45);color:white;}
+.badge.green {background:rgba(13,95,95,.46);border-color:rgba(124,217,202,.46);color:#c7f7e7;}
+.badge.amber {background:rgba(128,78,28,.51);border-color:rgba(242,181,95,.5);color:#ffe6ad;}
+
+/* 09 — Public landing, login and modal surfaces should belong to the same product. */
+.public-shell,.loading-screen {background:linear-gradient(147deg,#020b27,#021861 62%,#050d2b);}
+.public-nav,.public-footer {background:rgba(2,24,97,.46);border-color:rgba(144,201,255,.27);}
+.auth-card,.modal,.value-grid article,.orbital,.orbit-agent {
+  border-radius:17px;border-color:rgba(145,201,255,.36);
+  background:var(--hi-glass-bg);
+  box-shadow:var(--hi-glass-shine),var(--hi-glass-shadow);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+.modal-shade {background:rgba(1,5,24,.75);backdrop-filter:blur(8px);}
+
+/* 10 — Responsive and accessibility fallbacks. No new visual element captures clicks. */
+@media(max-width:950px) {
+  .main-shell::before {inset:0;opacity:.56;}
+  .sidebar nav button {min-height:38px;}
+}
+@media(max-width:700px) {
+  .sidebar::after {width:min(238px,75vw);}
+  .panel,.project-card,.stat,.hi-chat-shell,.kanban-column,.task-card {
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  }
+  .hi-chat-history {backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);}
+  .main-shell::before {opacity:.33;}
+  .composer textarea {margin:0 9px;width:calc(100% - 18px);}
+}
+@supports not (backdrop-filter:blur(1px)) {
+  .sidebar {background:#041846;}
+  .topbar {background:#061941;}
+  .panel,.stat,.project-card,.agent-card,.kanban-column,.task-card,.modal,.auth-card,
+  .hi-chat-shell,.project-ai-toolbar {background:#0a2458;}
+  .sidebar nav button {background:#123672;}
+  .hi-chat-history,.hi-chat-composer {background:#081e4c;}
+  .hi-chat-bubble {background:#18386c;}
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after {animation:none!important;transition:none!important;scroll-behavior:auto!important;}
+}

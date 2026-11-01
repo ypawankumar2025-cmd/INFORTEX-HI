@@ -1,0 +1,4 @@
+Crow v1.2.1
+Upstream: https://github.com/CrowCpp/Crow
+Commit: 575146274a8f1d8b7a455b71566325d5b15699ad
+Included unmodified headers and upstream BSD-3-Clause license.

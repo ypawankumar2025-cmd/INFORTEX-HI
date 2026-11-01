@@ -1,0 +1,46 @@
+CREATE TABLE IF NOT EXISTS schema_migrations(version TEXT PRIMARY KEY, applied_at BIGINT NOT NULL);
+CREATE TABLE IF NOT EXISTS roles(name TEXT PRIMARY KEY);
+INSERT INTO roles(name) VALUES ('owner'),('admin'),('member'),('viewer') ON CONFLICT DO NOTHING;
+CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, name TEXT NOT NULL, salt TEXT NOT NULL, password_hash TEXT NOT NULL, is_admin INTEGER NOT NULL DEFAULT 0, created_at BIGINT NOT NULL);
+CREATE TABLE IF NOT EXISTS sessions(token_hash TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,expires_at BIGINT NOT NULL);
+CREATE INDEX IF NOT EXISTS sessions_user ON sessions(user_id);
+CREATE TABLE IF NOT EXISTS workspaces(id TEXT PRIMARY KEY,name TEXT NOT NULL,owner_id TEXT NOT NULL REFERENCES users(id),created_at BIGINT NOT NULL);
+CREATE TABLE IF NOT EXISTS workspace_members(workspace_id TEXT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,role TEXT NOT NULL REFERENCES roles(name),PRIMARY KEY(workspace_id,user_id));
+CREATE TABLE IF NOT EXISTS invitations(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL REFERENCES workspaces(id),email TEXT NOT NULL,role TEXT NOT NULL REFERENCES roles(name),token_hash TEXT UNIQUE NOT NULL,expires_at BIGINT NOT NULL,accepted_at BIGINT NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,name TEXT NOT NULL,description TEXT NOT NULL,created_by TEXT NOT NULL REFERENCES users(id),created_at BIGINT NOT NULL);
+CREATE INDEX IF NOT EXISTS projects_workspace ON projects(workspace_id);
+CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,title TEXT NOT NULL,description TEXT NOT NULL DEFAULT '',status TEXT NOT NULL CHECK(status IN ('backlog','in_progress','review','done')),priority TEXT NOT NULL CHECK(priority IN ('low','medium','high')),assignee TEXT NOT NULL DEFAULT '',deadline TEXT NOT NULL DEFAULT '',created_by TEXT NOT NULL REFERENCES users(id),created_at BIGINT NOT NULL);
+CREATE INDEX IF NOT EXISTS tasks_project ON tasks(project_id);
+CREATE TABLE IF NOT EXISTS task_dependencies(task_id TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,depends_on TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,PRIMARY KEY(task_id,depends_on),CHECK(task_id<>depends_on));
+CREATE TABLE IF NOT EXISTS milestones(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,title TEXT NOT NULL,deadline TEXT NOT NULL,status TEXT NOT NULL CHECK(status IN ('open','done')));
+CREATE TABLE IF NOT EXISTS agents(id TEXT PRIMARY KEY,name TEXT NOT NULL,responsibility TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS agent_settings(workspace_id TEXT NOT NULL REFERENCES workspaces(id),agent_id TEXT NOT NULL REFERENCES agents(id),enabled INTEGER NOT NULL DEFAULT 1,instructions TEXT NOT NULL DEFAULT '',PRIMARY KEY(workspace_id,agent_id));
+CREATE TABLE IF NOT EXISTS conversations(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,title TEXT NOT NULL,created_by TEXT NOT NULL REFERENCES users(id),created_at BIGINT NOT NULL);
+CREATE TABLE IF NOT EXISTS messages(id TEXT PRIMARY KEY,conversation_id TEXT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,role TEXT NOT NULL,content TEXT NOT NULL,created_at BIGINT NOT NULL);
+CREATE TABLE IF NOT EXISTS runs(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,conversation_id TEXT NOT NULL REFERENCES conversations(id),created_by TEXT NOT NULL REFERENCES users(id),prompt TEXT NOT NULL,mode TEXT NOT NULL,status TEXT NOT NULL,proposal TEXT NOT NULL DEFAULT '{}',error TEXT NOT NULL DEFAULT '',created_at BIGINT NOT NULL,finished_at BIGINT NOT NULL DEFAULT 0);
+CREATE INDEX IF NOT EXISTS runs_project ON runs(project_id,created_at);
+CREATE TABLE IF NOT EXISTS agent_executions(id TEXT PRIMARY KEY,run_id TEXT NOT NULL REFERENCES runs(id) ON DELETE CASCADE,agent_id TEXT NOT NULL REFERENCES agents(id),status TEXT NOT NULL,output TEXT NOT NULL DEFAULT '{}',error TEXT NOT NULL DEFAULT '',started_at BIGINT NOT NULL,elapsed_ms BIGINT NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS agent_messages(id TEXT PRIMARY KEY,run_id TEXT NOT NULL REFERENCES runs(id) ON DELETE CASCADE,sender TEXT NOT NULL,recipient TEXT NOT NULL,payload TEXT NOT NULL,created_at BIGINT NOT NULL);
+CREATE TABLE IF NOT EXISTS documents(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,name TEXT NOT NULL,mime TEXT NOT NULL,content TEXT NOT NULL,created_by TEXT NOT NULL REFERENCES users(id),created_at BIGINT NOT NULL);
+CREATE TABLE IF NOT EXISTS document_embeddings(id TEXT PRIMARY KEY,document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,chunk_index INTEGER NOT NULL,content TEXT NOT NULL,vector TEXT NOT NULL,model TEXT NOT NULL,UNIQUE(document_id,chunk_index));
+CREATE TABLE IF NOT EXISTS memories(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,content TEXT NOT NULL,source_run TEXT REFERENCES runs(id),created_at BIGINT NOT NULL);
+CREATE INDEX IF NOT EXISTS memories_project ON memories(project_id);
+CREATE TABLE IF NOT EXISTS approvals(id TEXT PRIMARY KEY,run_id TEXT UNIQUE NOT NULL REFERENCES runs(id) ON DELETE CASCADE,status TEXT NOT NULL CHECK(status IN ('pending','approved','rejected','changes_requested')),reviewer_id TEXT REFERENCES users(id),feedback TEXT NOT NULL DEFAULT '',reviewed_at BIGINT NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS comments(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,user_id TEXT NOT NULL REFERENCES users(id),content TEXT NOT NULL,created_at BIGINT NOT NULL);
+CREATE TABLE IF NOT EXISTS notifications(id TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,content TEXT NOT NULL,is_read INTEGER NOT NULL DEFAULT 0,created_at BIGINT NOT NULL);
+CREATE TABLE IF NOT EXISTS audit_logs(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL REFERENCES workspaces(id),user_id TEXT NOT NULL REFERENCES users(id),action TEXT NOT NULL,entity_id TEXT NOT NULL,created_at BIGINT NOT NULL);
+CREATE INDEX IF NOT EXISTS audit_workspace ON audit_logs(workspace_id,created_at);
+-- HI AI Chat: private, persistent general conversations (not tied to projects).
+CREATE TABLE IF NOT EXISTS chat_threads(id TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,title TEXT NOT NULL,created_at BIGINT NOT NULL,updated_at BIGINT NOT NULL);
+CREATE INDEX IF NOT EXISTS chat_threads_owner ON chat_threads(user_id,updated_at);
+CREATE TABLE IF NOT EXISTS chat_messages(id TEXT PRIMARY KEY,thread_id TEXT NOT NULL REFERENCES chat_threads(id) ON DELETE CASCADE,role TEXT NOT NULL CHECK(role IN ('user','assistant')),content TEXT NOT NULL,created_at BIGINT NOT NULL);
+CREATE INDEX IF NOT EXISTS chat_messages_thread ON chat_messages(thread_id,created_at);
+INSERT INTO schema_migrations(version,applied_at) VALUES ('001',0) ON CONFLICT DO NOTHING;
+INSERT INTO schema_migrations(version,applied_at) VALUES ('002',0) ON CONFLICT DO NOTHING;
+
+-- Project-aware AI conversations. Separate from personal general chat; project scoped.
+CREATE TABLE IF NOT EXISTS project_chat_threads(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,title TEXT NOT NULL,created_at BIGINT NOT NULL,updated_at BIGINT NOT NULL);
+CREATE INDEX IF NOT EXISTS project_chat_threads_owner ON project_chat_threads(project_id,user_id,updated_at);
+CREATE TABLE IF NOT EXISTS project_chat_messages(id TEXT PRIMARY KEY,thread_id TEXT NOT NULL REFERENCES project_chat_threads(id) ON DELETE CASCADE,role TEXT NOT NULL CHECK(role IN ('user','assistant')),content TEXT NOT NULL,created_at BIGINT NOT NULL);
+CREATE INDEX IF NOT EXISTS project_chat_messages_thread ON project_chat_messages(thread_id,created_at);
+INSERT INTO schema_migrations(version,applied_at) VALUES ('003',0) ON CONFLICT DO NOTHING;

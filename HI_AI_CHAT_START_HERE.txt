@@ -1,0 +1,19 @@
+INFOTEX HI - NEW AI CHAT INSTALL
+
+1) BACK UP your existing HI folder and Docker data before replacing files.
+2) STOP the old application (no volume deletion). Use: docker compose stop
+3) Extract this ZIP to a NEW folder; compare or copy the source files into your current HI project.
+   IMPORTANT: Keep your existing .env file and original Docker Compose project name.
+4) Open CMD in the existing HI folder; check your local .env already has the live AI settings.
+5) Run: docker compose config --quiet
+6) Run: docker compose up -d --build
+7) Run: docker compose ps
+8) Open http://localhost:8080 and click AI Chat on left sidebar.
+9) Send one small question; try the conversation history and New chat buttons.
+
+Your files, projects and tasks are NOT in this ZIP. They are saved in your local
+PostgreSQL volume. Never use docker compose down -v or prune volumes.
+
+SECURITY: Original uploaded ZIP included a .env file with sensitive credentials.
+This distributed ZIP deliberately DOES NOT include .env. Rotate any exposed API keys.
+The chat requires a working account, live AI and available provider quota.

@@ -1,0 +1,203 @@
+/*
+  INFOTEX HI / BLUE BLOOM CINEMA v2
+  Reference palette: #021861, #255DCE, #DE1110.
+  Original decorative botanical artwork in /hi-blue-bloom.svg.
+  Only presentation changes. No backend, routing or database modifications.
+*/
+:root {
+  color-scheme: dark;
+  --bloom-navy: #021861;
+  --bloom-blue: #255DCE;
+  --bloom-red: #DE1110;
+  --bloom-midnight: #030a21;
+  --bloom-panel: #071435;
+  --bloom-paper: #f5f5ff;
+  --muted: #b5c4ed;
+  --panel: #081538;
+  --border: #254a91;
+  --blue: #6899ff;
+  color: var(--bloom-paper);
+  background: var(--bloom-midnight);
+  font-family: "Segoe UI Variable", "Segoe UI", Inter, Arial, sans-serif;
+}
+html, body {background:#02091f;color:var(--bloom-paper);}
+::selection { background: #de1110; color:#fff; }
+*:focus-visible {outline:2px solid #8ab4ff!important; outline-offset:3px;}
+.app-shell {background:#02091f;}
+.main-shell {
+  background:
+    radial-gradient(ellipse 75% 22% at 70% 0%, #255dce35 0%, transparent 86%),
+    linear-gradient(160deg,#020a25 0%,#061749 47%,#02081d 100%);
+}
+.main-content {position:relative;}
+.main-content::before { content:none; }
+/* Dark editorial navigation: strict red/blue geometry instead of neon everywhere. */
+.sidebar {
+  background:linear-gradient(172deg,#021861,#03113f 56%,#02091f);
+  border-right:1px solid #3467ce72;
+  box-shadow: 9px 0 38px #02071677;
+}
+.sidebar::after {
+  content:"";position:fixed;top:0;left:0;width:238px;height:4px;
+  background:linear-gradient(90deg,#de1110 0 38%,#255dce 38% 100%);
+  pointer-events:none;
+}
+.sidebar .logo {color:#fff;letter-spacing:-4px;text-shadow:none;}
+.sidebar .logo span {color:#ff413e;}
+.brand > div {color:#fff;letter-spacing:1.4px;}
+.brand small {color:#a8c5ff;}
+.nav-label {color:#829ede;font-size:10px;letter-spacing:2px;}
+.sidebar nav button {color:#c2d2fa;border-radius:5px;font-size:12px;transition:background .2s ease,color .2s ease;}
+.sidebar nav button svg{color:#a2c7ff;}
+.sidebar nav button:hover{background:#255dce33;color:white;transform:none;}
+.sidebar nav button.active {
+  color:white;background:#255dce;
+  box-shadow:inset 0 1px #ffffff25;
+  font-weight:700;
+}
+.sidebar nav button.active::before {background:#de1110;box-shadow:none;left:-16px;width:4px;top:0;bottom:0;border-radius:0;}
+.sidebar nav button.active svg {color:#fff;filter:none;}
+.nav-new {background:#de1110;color:#fff;border:none;}
+.workspace-picker,.mode-card {background:#061949;border-color:#3966b1; border-radius:7px;}
+.workspace-avatar {background:#255dce;color:white;}
+.sidebar-bottom .user-bar {border-color:#4969ae66;}
+.topbar {background:rgba(3,12,40,.95);border-bottom:1px solid #31599c88;backdrop-filter:blur(12px);}
+.topbar .icon-button:hover {background:#193a80;}
+/* Buttons should have real visual energy, but remain legible. */
+.button,.hi-chat-new,.hi-chat-send {transition:background .16s ease,transform .16s ease;}
+.button {border-radius:5px;border-color:#4766a0;background:#10275c;color:#eff3ff;}
+.button:hover:not(:disabled) {background:#173c8b;}
+.button.primary,.hi-chat-new,.hi-chat-send {
+  color:white;background:#255dce;border:1px solid #6697fa;
+  box-shadow:inset 0 1px #ffffff27;
+}
+.button.primary:hover:not(:disabled),.hi-chat-new:hover,.hi-chat-send:hover:not(:disabled) {background:#3975f4;}
+.button.danger,.danger-button {background:#a60a16;border-color:#f35555;color:#fff;}
+.text-button,.text-button.light {color:#a9caff;}
+.text-button:hover {color:#fff;}
+input,textarea,select {border-radius:6px;background:#061337;color:#f7f8ff;border:1px solid #315394;}
+input:focus,select:focus,textarea:focus {border-color:#80a7ff;outline:1px solid #5387ff;}
+input::placeholder, textarea::placeholder{color:#97aad0;}
+/* Dashboard lead: the screenshot's punchy blue botanicals / vivid scarlet contrast. */
+.page-head .eyebrow,.hi-chat-eyebrow {color:#9dbbff;letter-spacing:2.2px;font-weight:800;}
+.page-head h1 {color:white;font-weight:650;letter-spacing:-1.6px;}
+.page-head p {color:#a3b8e0;}
+.welcome-banner {
+  position:relative;
+  min-height:360px;
+  margin-bottom:29px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:56px 35px;
+  border-radius:3px;
+  border:1px solid #f75a52;
+  background:
+    linear-gradient(90deg,rgba(3,13,46,.43),rgba(3,13,46,.06) 42%,rgba(3,13,46,.35)),
+    url('/hi-blue-bloom.svg') center center / cover no-repeat,
+    #de1110;
+  box-shadow:0 19px 55px #0008207d;
+  isolation:isolate;
+}
+.welcome-banner::before{
+  content:"";position:absolute;inset:14px;border:1px solid #f8e8ff88;pointer-events:none;z-index:-1;
+}
+.welcome-banner::after {
+  content:"";position:absolute;left:22px;top:21px;width:36px;height:36px;
+  border-left:3px solid #fff;border-top:3px solid #fff;pointer-events:none;
+}
+.welcome-banner>div:first-child {position:relative;z-index:1;max-width:680px;}
+.welcome-banner .badge {
+  background:#031956e8;border:1px solid #8aafff;color:#fff;
+  padding:8px 13px;letter-spacing:1.35px;font-size:9px;
+  border-radius:0;
+}
+.welcome-banner h2 {
+  color:#fff;font-family:Georgia,"Times New Roman",serif;
+  font-weight:500;font-size:clamp(37px,4.4vw,67px);line-height:1.02;
+  text-shadow:0 3px 17px #010a46c9;
+  letter-spacing:-1.3px;margin:22px 0 15px;
+}
+.welcome-banner p {
+  color:#fff;font-size:13px;font-weight:500;
+  text-shadow:0 2px 9px #010621;line-height:1.7;
+}
+.welcome-banner .text-button {
+  display:inline-flex;margin-top:21px;padding:11px 19px;
+  background:#03164de0;color:#fff;border:1px solid #a9c7ff;
+  border-radius:2px;text-transform:uppercase;font-size:10px;
+  letter-spacing:1.4px;font-weight:800;
+}
+.welcome-banner .text-button:hover {background:#255dce;}
+.welcome-banner .banner-art {display:none;}
+/* Restrained navy surfaces keep long project content readable. */
+.panel,.stat,.project-card,.modal-card {
+  background:linear-gradient(160deg,#091c4a,#061339 85%);
+  border:1px solid #335eaf;
+  border-radius:6px;
+  box-shadow:0 12px 32px #01071638;
+}
+.panel-head {background:#091e51;border-bottom:1px solid #385bad;}
+.panel-head h3 {color:#f2f5ff;text-transform:uppercase;letter-spacing:1.1px;font-weight:700;}
+.stat {position:relative;overflow:hidden;}
+.stat::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#255dce,#4a8eff 60%,#de1110);}
+.stat strong{color:white;font-weight:750;}
+.stat>span,.stat small {color:#a8c0f1;}
+.project-row:hover,.table-wrap tr:hover td {background:#142e66;}
+.project-symbol {background:#143c91;border-color:#4877dd;color:#fff;}
+.progress-track{background:#203b71;}
+.progress-track>span{background:#255dce;}
+.badge.blue {background:#133c99;border-color:#4c7bdb;color:white;}
+.badge.red {background:#7f0919;border-color:#ee4949;color:white;}
+.badge.green {background:#063f44;color:#a5f2cf;border-color:#2b7f7b;}
+.badge.amber {background:#5a3917;color:#ffe0a0;border-color:#a27935;}
+.error,.global-error,.hi-chat-alert {background:#630813;color:#fff;border:1px solid #de1110;}
+/* AI Chat: blue editorial panels with restrained red punctuation. */
+.hi-chat-heading h1 {color:#fff;font-family:Georgia,"Times New Roman",serif;letter-spacing:-.6px;font-size:36px;}
+.hi-chat-heading h1 svg {color:#ff4749;}
+.hi-chat-heading p {color:#b9c9ed;}
+.hi-chat-shell {background:#041030;border:1px solid #3464b9;border-radius:6px;box-shadow:0 18px 48px #02051172;}
+.hi-chat-history {background:linear-gradient(180deg,#021861,#041038);border-right:1px solid #3866b7;}
+.hi-chat-thread.selected {background:#255dce;border-radius:4px;}
+.hi-chat-thread.selected button {color:white;}
+.hi-chat-delete:hover {color:#ff6363;}
+.hi-chat-main {background:#050e2b;}
+.hi-chat-transcript {
+  background:
+    linear-gradient(160deg,rgba(2,14,45,.85),rgba(2,9,28,.97)),
+    url('/hi-blue-bloom.svg') center / cover;
+}
+.hi-chat-welcome {position:relative;max-width:460px;padding:26px 30px;border:1px solid #4169a9;background:#071941e3;}
+.hi-chat-welcome::before{content:"";position:absolute;left:0;top:0;width:41px;height:4px;background:#de1110;}
+.hi-chat-welcome svg {color:#ff4949;}
+.hi-chat-welcome h2{color:#fff;font-family:Georgia,"Times New Roman",serif;}
+.hi-chat-avatar {background:#081d55;color:#a9cfff;border:1px solid #3357a4;}
+.hi-chat-message.from-user .hi-chat-avatar{background:#255dce;color:#fff;}
+.hi-chat-bubble {background:#0b2053;color:#f0f4ff;border:1px solid #345b9d;border-radius:7px;box-shadow:0 6px 19px #0005;}
+.hi-chat-message.from-user .hi-chat-bubble {background:#255dce;color:white;border-color:#5e94ff;}
+.hi-chat-composer {background:#04123a;border-top:1px solid #335da7;}
+.hi-chat-caption {color:#a0b3d9!important;}
+.hi-chat-compose-row textarea{background:#081b49;border-color:#3b62ae;border-radius:5px;}
+.project-ai-toolbar{background:#0a2053;border:1px solid #3765c1;border-radius:5px;}
+.project-ai-toolbar select{background:#041337;border-color:#3a6cc6;color:white;}
+.project-ai-context-pill{color:#d6e4ff;}
+.project-ai-info {color:#b7caed;border-color:#3261b7;}
+/* For text clarity avoid floral image behind forms/tables. */
+.table-wrap, .panel-body,.hi-chat-composer{isolation:isolate;}
+@media(max-width:900px){
+  .welcome-banner{min-height:310px;}
+  .welcome-banner h2{font-size:clamp(34px,5vw,55px);}
+  .hi-chat-shell{box-shadow:none;}
+}
+@media(max-width:700px){
+ .sidebar::after{width:min(238px,75vw);}
+ .welcome-banner{padding:49px 22px;min-height:330px;background-position:48% 50%;}
+ .welcome-banner h2{font-size:clamp(32px,8vw,49px);}
+ .welcome-banner p{font-size:12px;}
+ .welcome-banner::before{inset:9px;}
+ .stats-grid{gap:10px;}
+ .hi-chat-heading h1{font-size:29px;}
+ .hi-chat-transcript{background:linear-gradient(155deg,rgba(3,17,52,.88),rgba(3,12,39,.98)),url('/hi-blue-bloom.svg') center/cover;}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;}}

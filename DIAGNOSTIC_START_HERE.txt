@@ -1,0 +1,20 @@
+INFOTEX HI - AI Provider Diagnostic Patch
+
+Purpose: Replaces the generic provider error with the numeric HTTP status,
+request path, and a safe general hint. It does not log API keys, request bodies,
+or provider response bodies. It does not change AI model, tokens, database,
+chat history, or authentication.
+
+Apply to existing HI project:
+1. Back up HI/backend/src/provider.cpp to provider.cpp.bak before replacing.
+2. Extract this ZIP.
+3. Copy the included backend/src/provider.cpp into your HI folder,
+   replacing ONLY backend/src/provider.cpp.
+4. Do not change or delete .env. Do not run docker compose down -v.
+5. In the existing HI folder, run:
+       docker compose up -d --no-deps --build backend
+6. Retry the previously failed "Send to Agent Team" prompt ONCE.
+7. Report the numeric HTTP status / new error text, not your API key.
+
+Note: This is a diagnosis aid, NOT yet a fix for provider-side limits.
+If the prior problem was transient, the retry could succeed.
