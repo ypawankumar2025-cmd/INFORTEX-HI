@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Check, Copy } from "lucide-react";
 import "../hi-markdown-chat.css";
 
@@ -19,9 +19,9 @@ function inline(text: string, prefix: string): ReactNode[] {
       nodes.push(<code className="hi-md-inline-code" key={key}>{value.slice(1, -1)}</code>);
     } else if (value.startsWith("~~")) {
       nodes.push(<del key={key}>{inline(value.slice(2, -2), key)}</del>);
-    } else if (match[2]) {
+    } else if (match[3]) {
       // URL syntax is constrained to http(s) and mailto by INLINE; never render model-supplied HTML.
-      nodes.push(<a key={key} href={match[2]} target="_blank" rel="noopener noreferrer nofollow">{match[1]}</a>);
+      nodes.push(<a key={key} href={match[3]} target="_blank" rel="noopener noreferrer nofollow">{match[2]}</a>);
     } else {
       nodes.push(<em key={key}>{inline(value.slice(1, -1), key)}</em>);
     }
@@ -59,17 +59,24 @@ function codeTokens(source: string): ReactNode[] {
 function CopyText({ text, label }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false);
   const [failed, setFailed] = useState(false);
+useEffect(() => {
+  setCopied(false);
+  setFailed(false);
+}, [text]);
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true); setFailed(false);
     } catch {
+      setCopied(false);
       setFailed(true);
     }
   };
   return <button type="button" className="hi-md-copy" aria-label={label} title={failed ? "Clipboard unavailable" : label} onClick={() => void copy()}>
     {copied ? <Check size={14} /> : <Copy size={14} />}
-    <span>{failed ? "Copy unavailable" : copied ? "Copied" : "Copy"}</span>
+    <span role="status" aria-live="polite" aria-atomic="true">
+  {failed ? "Copy unavailable" : copied ? "Copied" : "Copy"}
+</span>
   </button>;
 }
 
