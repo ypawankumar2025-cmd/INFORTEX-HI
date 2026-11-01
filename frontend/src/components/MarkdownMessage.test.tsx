@@ -1,8 +1,8 @@
 
  // @vitest-environment jsdom
 
-import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import MarkdownMessage from "./MarkdownMessage";
 
 afterEach(() => cleanup());
@@ -130,4 +130,36 @@ it("renders HTML characters inside code without creating HTML elements", () => {
   );
 
   expect(container.querySelector("img")).toBeNull();
+});
+
+it("copies the exact multiline C++ code from an AI code block", async () => {
+  const code = [
+    "#include <iostream>",
+    "int main() {",
+    '  std::cout << "Hello, HI!";',
+    "  return 0;",
+    "}",
+  ].join("\n");
+
+  const writeText = vi.fn().mockResolvedValue(undefined);
+
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: { writeText },
+  });
+
+  render(
+    <MarkdownMessage
+      content={["```cpp", code, "```"].join("\n")}
+    />
+  );
+
+  fireEvent.click(
+    screen.getByRole("button", { name: "Copy code" })
+  );
+
+  await screen.findByText("Copied");
+
+  expect(writeText).toHaveBeenCalledTimes(1);
+  expect(writeText).toHaveBeenCalledWith(code);
 });
