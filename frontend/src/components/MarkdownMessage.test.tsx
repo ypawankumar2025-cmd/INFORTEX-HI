@@ -89,3 +89,45 @@ it("does not create an image with an unsafe event handler", () => {
   expect(container.querySelector("img")).toBeNull();
   expect(container.textContent).toContain(payload);
 });
+
+it("renders Java code with its language and Copy Code button", () => {
+  const content = [
+    "```java",
+    'System.out.println("Hello, HI!");',
+    "```",
+  ].join("\n");
+
+  const { container } = render(
+    <MarkdownMessage content={content} />
+  );
+
+  expect(container.querySelector(".hi-md-codeblock")).not.toBeNull();
+
+  expect(container.querySelector("pre code")?.textContent).toContain(
+    'System.out.println("Hello, HI!");'
+  );
+
+  expect(screen.getByText("java")).toBeTruthy();
+
+  expect(
+    screen.getByRole("button", { name: "Copy code" })
+  ).toBeTruthy();
+});
+
+it("renders HTML characters inside code without creating HTML elements", () => {
+  const content = [
+    "```html",
+    '<img src="x" onerror="alert(1)">',
+    "```",
+  ].join("\n");
+
+  const { container } = render(
+    <MarkdownMessage content={content} />
+  );
+
+  expect(container.querySelector("pre code")?.textContent).toContain(
+    '<img src="x" onerror="alert(1)">'
+  );
+
+  expect(container.querySelector("img")).toBeNull();
+});
