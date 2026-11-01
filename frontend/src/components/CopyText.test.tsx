@@ -40,3 +40,37 @@ describe("INFOTEX HI clipboard reliability", () => {
     );
   });
 });
+
+it("provides accessible clipboard status feedback", async () => {
+  const writeText = vi.fn()
+    .mockResolvedValueOnce(undefined)
+    .mockRejectedValueOnce(new Error("Clipboard blocked"));
+
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: { writeText },
+  });
+
+  render(<CopyText text="Hello HI" label="Copy code" />);
+
+  const status = screen.getByRole("status");
+
+  expect(status.getAttribute("aria-live")).toBe("polite");
+  expect(status.getAttribute("aria-atomic")).toBe("true");
+  expect(status.textContent).toBe("Copy");
+
+  const button = screen.getByRole("button", {
+    name: "Copy code",
+  });
+
+  fireEvent.click(button);
+  await screen.findByText("Copied");
+
+  expect(status.textContent).toBe("Copied");
+
+  fireEvent.click(button);
+  await screen.findByText("Copy unavailable");
+
+  expect(status.textContent).toBe("Copy unavailable");
+  expect(writeText).toHaveBeenCalledTimes(2);
+});

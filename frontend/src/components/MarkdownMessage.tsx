@@ -70,7 +70,9 @@ function CopyText({ text, label }: { text: string; label: string }) {
   };
   return <button type="button" className="hi-md-copy" aria-label={label} title={failed ? "Clipboard unavailable" : label} onClick={() => void copy()}>
     {copied ? <Check size={14} /> : <Copy size={14} />}
-    <span>{failed ? "Copy unavailable" : copied ? "Copied" : "Copy"}</span>
+    <span role="status" aria-live="polite" aria-atomic="true">
+  {failed ? "Copy unavailable" : copied ? "Copied" : "Copy"}
+</span>
   </button>;
 }
 
