@@ -64,6 +64,7 @@ function CopyText({ text, label }: { text: string; label: string }) {
       await navigator.clipboard.writeText(text);
       setCopied(true); setFailed(false);
     } catch {
+      setCopied(false);
       setFailed(true);
     }
   };
