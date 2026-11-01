@@ -67,3 +67,25 @@ it("renders HTTPS links with secure attributes", () => {
   expect(link.getAttribute("rel")).toContain("noopener");
   expect(link.getAttribute("rel")).toContain("noreferrer");
 });
+
+it("renders script injection as harmless text", () => {
+  const payload = '<script>alert("Hacked")</script>';
+
+  const { container } = render(
+    <MarkdownMessage content={payload} />
+  );
+
+  expect(container.querySelector("script")).toBeNull();
+  expect(container.textContent).toContain(payload);
+});
+
+it("does not create an image with an unsafe event handler", () => {
+  const payload = '<img src="x" onerror="alert(1)">';
+
+  const { container } = render(
+    <MarkdownMessage content={payload} />
+  );
+
+  expect(container.querySelector("img")).toBeNull();
+  expect(container.textContent).toContain(payload);
+});
