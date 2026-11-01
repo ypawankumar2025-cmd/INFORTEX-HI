@@ -1,0 +1,8 @@
+FICTIONAL DEMO DOCUMENT — NOT VERIFIED VENUE INFORMATION
+Campus Tech Summit sample constraints:
+The sample auditorium seats 320 participants.
+Assume a projector and two microphones are available, pending confirmation.
+Registration should open 30 minutes before the first session.
+A team member must verify venue permission, accessibility, emergency exits,
+power availability and written vendor quotations before committing funds.
+These statements are invented only for demonstrating project retrieval.

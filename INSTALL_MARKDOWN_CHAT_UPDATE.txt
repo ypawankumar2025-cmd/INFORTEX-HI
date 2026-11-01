@@ -1,0 +1,51 @@
+INFOTEX HI - AI CHAT + PROJECT AI MARKDOWN POLISH
+==================================================
+
+This is a frontend-only patch for the existing working INFOTEX HI project.
+It is NOT a full project archive. Backend, Docker Compose, database, agent
+logic and the five-theme system are not changed.
+
+INSTALL (Windows)
+-----------------
+1. Copy the current working HI folder somewhere safe first.
+2. Extract this ZIP.
+3. Copy its frontend folder into:
+   Downloads\INFOTEX_HI_Fullstack_Project (5)\HI\
+   When prompted, merge folders and replace ONLY the four matching files.
+4. Open CMD in that real HI folder (NOT inside a ZIP) and run:
+
+   docker compose up -d --no-deps --build frontend
+
+5. Open http://localhost:8080 and press Ctrl+Shift+R.
+6. Open any existing assistant response in AI Chat and Project AI.
+   You should see rendered headings, bold, bullets, tables, and code blocks.
+   Check the Copy buttons. Testing existing messages costs no AI tokens.
+
+FEATURES
+--------
+- Safe basic Markdown formatting in assistant responses, including code blocks.
+- Basic keyword highlighting for code examples. Not a complete language parser.
+- Copy button for each assistant response and fenced code block.
+- Mobile-friendly table/code horizontal scrolling.
+- Styling adapts to original Blue Glass and the other four themes.
+- Users' own messages remain plain text.
+- No new npm dependencies or changes to package-lock.json.
+- Model-generated HTML is rendered as text, not injected into the page.
+- Project AI retains the earlier decision to remove the Agent Team action.
+
+ROLLBACK
+--------
+Restore these same four paths from your safe backup, then rebuild frontend.
+
+TEST STATUS
+-----------
+- TypeScript/TSX transpilation: passed
+- CSS stylesheet parsing: passed
+- Isolated Markdown rendering smoke test (headings, bold, italics, lists,
+  tables, code, and HTML escaping): passed
+- Full Docker/npm build: NOT run in the creation environment (offline npm
+  dependencies missing); check the build on your laptop.
+
+SECURITY
+--------
+This ZIP has NO .env or API keys. Do not share your backup containing .env.

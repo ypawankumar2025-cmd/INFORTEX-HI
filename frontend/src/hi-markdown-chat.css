@@ -1,0 +1,47 @@
+/* AI Chat and Project AI: scoped, responsive Markdown presentation for every installed theme. */
+.hi-chat-bubble { min-width:0; max-width:100%; }
+.hi-chat-message { min-width:0; }
+.hi-chat-message.from-ai .hi-chat-bubble { width:fit-content; max-width:100%; }
+.hi-chat-message.from-ai .hi-markdown { white-space:normal; overflow-wrap:anywhere; font-size:inherit; line-height:1.65; }
+.hi-markdown > :first-child { margin-top:0; }
+.hi-markdown > :last-child { margin-bottom:0; }
+.hi-markdown p { margin:.18em 0 .85em; color:inherit; font-size:inherit; line-height:inherit; }
+.hi-markdown h3,.hi-markdown h4 { color:inherit; font-weight:750; line-height:1.3; overflow-wrap:anywhere; }
+.hi-markdown h3 { font-size:1.25em; margin:1.15em 0 .5em; }
+.hi-markdown h4 { font-size:1.11em; margin:1.1em 0 .5em; }
+.hi-markdown strong { font-weight:800; color:inherit; }
+.hi-markdown :is(ul,ol) { margin:.35em 0 .9em; padding-left:1.5em; list-style-position:outside; }
+.hi-markdown ul { list-style:disc; }
+.hi-markdown ol { list-style:decimal; }
+.hi-markdown li { margin:.2em 0; }
+.hi-markdown li::marker { color:#77c9ff; }
+.hi-markdown blockquote { border-left:3px solid #53b8ff; background:rgba(89,153,235,.09); margin:.7em 0; padding:.55em .8em; border-radius:0 8px 8px 0; color:inherit; }
+.hi-markdown hr { border:0; border-top:1px solid rgba(135,183,228,.38); margin:1em 0; }
+.hi-markdown a { color:#91e4ff; text-decoration:underline; text-underline-offset:2px; overflow-wrap:anywhere; }
+.hi-markdown a:hover { color:#dbf9ff; }
+.hi-md-inline-code { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.94em; color:#fff0b5; background:rgba(2,12,34,.42); padding:.11em .32em; border:1px solid rgba(123,173,236,.25); border-radius:5px; }
+.hi-md-table-scroll { width:100%; overflow-x:auto; margin:.7em 0 1em; border-radius:9px; border:1px solid rgba(125,182,246,.30); }
+.hi-markdown table { width:100%; min-width:280px; border-collapse:collapse; table-layout:auto; font-size:.96em; }
+.hi-markdown th,.hi-markdown td { max-width:380px; border-bottom:1px solid rgba(125,182,246,.22); padding:8px 10px; color:inherit; text-align:left; white-space:normal; vertical-align:top; }
+.hi-markdown th { background:rgba(15,44,93,.60); font-weight:800; color:inherit; }
+.hi-markdown tr:last-child td { border-bottom:0; }
+.hi-md-codeblock { min-width:0; border-radius:11px; border:1px solid rgba(119,172,230,.37); margin:.7em 0 1em; overflow:hidden; background:#071426; }
+.hi-md-codebar { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:7px 10px; background:#0d2445; border-bottom:1px solid rgba(121,176,242,.22); color:#c7d9f8; font-size:11px; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+.hi-md-codeblock pre { margin:0; padding:13px 14px; background:transparent; color:#e8f3ff; overflow:auto; white-space:pre; tab-size:4; font-size:12px; line-height:1.65; }
+.hi-md-codeblock code { font-family:Consolas,"Liberation Mono",monospace; background:none; border:0; padding:0; color:inherit; white-space:pre; }
+.hi-code-keyword { color:#89baff; }
+.hi-code-string { color:#f7cb81; }
+.hi-code-number { color:#b9e899; }
+.hi-code-comment { color:#809bb4; font-style:italic; }
+.hi-md-copy { font-family:inherit; display:inline-flex; align-items:center; justify-content:center; gap:5px; background:rgba(45,92,155,.22); color:inherit; border:1px solid rgba(147,197,248,.34); border-radius:7px; padding:5px 9px; font-size:11px; cursor:pointer; line-height:1.2; }
+.hi-md-copy:hover { background:rgba(85,153,229,.33); }
+.hi-md-copy:focus-visible { outline:2px solid #78d6ff; outline-offset:2px; }
+.hi-chat-response-actions { display:flex; justify-content:flex-end; margin-top:9px; gap:7px; }
+/* Adapt chat prose & contrast to the selected light theme without changing the blue default. */
+html[data-hi-theme]:not([data-hi-theme="blue"]) .hi-chat-message.from-ai .hi-markdown { color:var(--ht-text,#26384a); }
+html[data-hi-theme]:not([data-hi-theme="blue"]) .hi-chat-message.from-ai .hi-markdown a { color:var(--ht-accent,#155caf); }
+html[data-hi-theme]:not([data-hi-theme="blue"]) .hi-chat-message.from-ai .hi-md-inline-code { color:var(--ht-text,#25334a); background:var(--ht-soft,#eaf1fc); border-color:var(--ht-line,#ccd6e3); }
+html[data-hi-theme]:not([data-hi-theme="blue"]) .hi-chat-message.from-ai .hi-markdown th { background:var(--ht-card-alt,#eff3f8); }
+html[data-hi-theme]:not([data-hi-theme="blue"]) .hi-chat-message.from-ai .hi-markdown li::marker { color:var(--ht-accent,#267dd5); }
+html[data-hi-theme]:not([data-hi-theme="blue"]) .hi-chat-message.from-ai .hi-md-copy { color:var(--ht-text,#26384a); border-color:var(--ht-line,#ccd6e3); background:var(--ht-card-alt,#edf1f8); }
+@media(max-width:700px) { .hi-chat-message.from-ai { max-width:100%; width:100%; } .hi-chat-message.from-ai .hi-chat-bubble { width:100%; padding:12px; } .hi-md-codeblock pre { font-size:11px; } .hi-md-copy { min-height:30px; } }

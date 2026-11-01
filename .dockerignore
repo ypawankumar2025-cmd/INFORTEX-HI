@@ -1,0 +1,9 @@
+.git
+**/.git
+**/node_modules
+**/dist
+**/.qa
+build
+.env
+*.db*
+*.log
