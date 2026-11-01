@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Check, Copy } from "lucide-react";
 import "../hi-markdown-chat.css";
 
@@ -59,6 +59,10 @@ function codeTokens(source: string): ReactNode[] {
 function CopyText({ text, label }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false);
   const [failed, setFailed] = useState(false);
+useEffect(() => {
+  setCopied(false);
+  setFailed(false);
+}, [text]);
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(text);
