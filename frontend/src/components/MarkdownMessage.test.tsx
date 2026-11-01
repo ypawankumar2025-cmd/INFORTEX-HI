@@ -44,3 +44,26 @@ describe("INFOTEX HI Markdown rendering", () => {
     expect(screen.getByText("Done")).toBeTruthy();
   });
 });
+
+it("does not turn unsafe JavaScript URLs into clickable links", () => {
+  render(
+    <MarkdownMessage content="[Unsafe](javascript:alert(1))" />
+  );
+
+  expect(screen.queryByRole("link")).toBeNull();
+});
+
+it("renders HTTPS links with secure attributes", () => {
+  render(
+    <MarkdownMessage content="[Docs](https://example.com/docs)" />
+  );
+
+  const link = screen.getByRole("link", { name: "Docs" });
+
+  expect(link.getAttribute("href")).toBe(
+    "https://example.com/docs"
+  );
+  expect(link.getAttribute("target")).toBe("_blank");
+  expect(link.getAttribute("rel")).toContain("noopener");
+  expect(link.getAttribute("rel")).toContain("noreferrer");
+});

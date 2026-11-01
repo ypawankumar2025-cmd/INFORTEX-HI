@@ -19,9 +19,9 @@ function inline(text: string, prefix: string): ReactNode[] {
       nodes.push(<code className="hi-md-inline-code" key={key}>{value.slice(1, -1)}</code>);
     } else if (value.startsWith("~~")) {
       nodes.push(<del key={key}>{inline(value.slice(2, -2), key)}</del>);
-    } else if (match[2]) {
+    } else if (match[3]) {
       // URL syntax is constrained to http(s) and mailto by INLINE; never render model-supplied HTML.
-      nodes.push(<a key={key} href={match[2]} target="_blank" rel="noopener noreferrer nofollow">{match[1]}</a>);
+      nodes.push(<a key={key} href={match[3]} target="_blank" rel="noopener noreferrer nofollow">{match[2]}</a>);
     } else {
       nodes.push(<em key={key}>{inline(value.slice(1, -1), key)}</em>);
     }
