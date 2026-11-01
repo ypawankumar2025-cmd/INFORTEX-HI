@@ -52,3 +52,24 @@ describe("INFOTEX HI Theme Studio", () => {
     expect((resetButton as HTMLButtonElement).disabled).toBe(true);
   });
 });
+
+it("announces the active theme accessibly", () => {
+  const onSelect = vi.fn();
+
+  const { rerender } = render(
+    <ThemeStudio selected="blue" onSelect={onSelect} />
+  );
+
+  const status = screen.getByRole("status");
+
+  expect(status.getAttribute("aria-live")).toBe("polite");
+  expect(status.getAttribute("aria-atomic")).toBe("true");
+  expect(status.textContent).toContain("Original Blue Glass");
+
+  rerender(
+    <ThemeStudio selected="noir" onSelect={onSelect} />
+  );
+
+  expect(screen.getByRole("status").textContent)
+    .toContain("Cobalt Noir");
+});

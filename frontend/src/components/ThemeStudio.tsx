@@ -46,7 +46,7 @@ export default function ThemeStudio({ selected, onSelect }: {
         <span className="hi-theme-eyebrow"><Palette size={16} /> YOUR WORKSPACE, YOUR STYLE</span>
         <h1>Make HI feel like yours.</h1>
         <p>Pick a look for the entire workspace. Your projects, chats, and AI configuration stay exactly as they are.</p>
-        <div className="hi-theme-current"><Sparkles size={16} /> Active theme: <strong>{THEMES.find(t => t.id === selected)?.title}</strong></div>
+        <div className="hi-theme-current" role="status" aria-live="polite" aria-atomic="true"><Sparkles size={16} /> Active theme: <strong>{THEMES.find(t => t.id === selected)?.title}</strong></div>
       </div>
       <div className="hi-theme-grid">
         {THEMES.map(t => {
