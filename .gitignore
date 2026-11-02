@@ -71,3 +71,10 @@ Testing/
 .env.*
 !.env.example
 node_modules/
+
+# Python bytecode and generated local review bundles
+__pycache__/
+*.py[cod]
+leader-review.zip
+leader-contributions.zip
+leader-contributions/
