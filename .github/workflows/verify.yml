@@ -36,5 +36,7 @@ jobs:
           npm --prefix frontend ci
           npm --prefix frontend test
           npm --prefix frontend run build
+      - name: Validate resolved Docker Compose service graph
+        run: python3 scripts/check_compose_contract.py --require-docker
       - name: Build Docker and verify PostgreSQL
         run: python3 scripts/test-compose.py
