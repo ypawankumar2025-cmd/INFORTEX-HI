@@ -27,7 +27,13 @@ CREATE TABLE IF NOT EXISTS memories(id TEXT PRIMARY KEY,project_id TEXT NOT NULL
 CREATE INDEX IF NOT EXISTS memories_project ON memories(project_id);
 CREATE TABLE IF NOT EXISTS approvals(id TEXT PRIMARY KEY,run_id TEXT UNIQUE NOT NULL REFERENCES runs(id) ON DELETE CASCADE,status TEXT NOT NULL CHECK(status IN ('pending','approved','rejected','changes_requested')),reviewer_id TEXT REFERENCES users(id),feedback TEXT NOT NULL DEFAULT '',reviewed_at BIGINT NOT NULL DEFAULT 0);
 CREATE TABLE IF NOT EXISTS comments(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,user_id TEXT NOT NULL REFERENCES users(id),content TEXT NOT NULL,created_at BIGINT NOT NULL);
+-- Optimize project comment history queries.
+CREATE INDEX IF NOT EXISTS comments_project_created
+ON comments (project_id, created_at DESC);
 CREATE TABLE IF NOT EXISTS notifications(id TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,content TEXT NOT NULL,is_read INTEGER NOT NULL DEFAULT 0,created_at BIGINT NOT NULL);
+-- Speed up notification history lookups for each user.
+CREATE INDEX IF NOT EXISTS notifications_user_created
+ON notifications (user_id, created_at DESC);
 CREATE TABLE IF NOT EXISTS audit_logs(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL REFERENCES workspaces(id),user_id TEXT NOT NULL REFERENCES users(id),action TEXT NOT NULL,entity_id TEXT NOT NULL,created_at BIGINT NOT NULL);
 CREATE INDEX IF NOT EXISTS audit_workspace ON audit_logs(workspace_id,created_at);
 -- HI AI Chat: private, persistent general conversations (not tied to projects).
@@ -44,3 +50,5 @@ CREATE INDEX IF NOT EXISTS project_chat_threads_owner ON project_chat_threads(pr
 CREATE TABLE IF NOT EXISTS project_chat_messages(id TEXT PRIMARY KEY,thread_id TEXT NOT NULL REFERENCES project_chat_threads(id) ON DELETE CASCADE,role TEXT NOT NULL CHECK(role IN ('user','assistant')),content TEXT NOT NULL,created_at BIGINT NOT NULL);
 CREATE INDEX IF NOT EXISTS project_chat_messages_thread ON project_chat_messages(thread_id,created_at);
 INSERT INTO schema_migrations(version,applied_at) VALUES ('003',0) ON CONFLICT DO NOTHING;
+INSERT INTO schema_migrations(version,applied_at) VALUES ('004',0) ON CONFLICT DO NOTHING;
+INSERT INTO schema_migrations(version,applied_at) VALUES ('005',0) ON CONFLICT DO NOTHING;
