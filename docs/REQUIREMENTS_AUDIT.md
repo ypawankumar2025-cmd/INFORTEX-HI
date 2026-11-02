@@ -22,7 +22,7 @@ This audit maps the supplied “MASTER PROJECT DEVELOPMENT PROMPT” to actual s
 | Streaming/web research | stream.hpp, provider.cpp, research.cpp; studio UI | Provider SSE transport tested with local HTTPS fixture. Browser polls partial summaries. Real vendor/Brave calls pending. |
 | Pages/navigation/design | Auth views plus workspace navigation | Public pages inspected; 13 signed-in navigation views tested with mocks. Authenticated browser and responsive visual QA pending. |
 | OOP/design patterns | docs/OOP_CONCEPTS.md | Factory/Strategy/Repository, polymorphism, templates and RAII mapped. No artificial multiple inheritance or mutable Singleton. Progress callbacks provide event notifications, not a general event bus. |
-| Schema/migrations | schema.sql and migrations/001_initial.sql | Idempotent initial schema; no general multi-version migration runner. |
+| Schema/migrations | database/schema.sql; migrations/001–005; scripts/verify_migrations.py | New database bootstrap records all five versions; existing database upgrade execution remains manual and must be reviewed/backed up. |
 | Reliability/security | authorization, prepared SQL, rate limits, extraction limits, audit records | Implemented controls tested at selected boundaries; load, penetration, backup/restore and disaster recovery acceptance pending. |
 | Tests/CI | backend/tests, scripts, frontend tests, .github/workflows/verify.yml | Local checks passed; remote CI and clean Docker build have not run here. |
 | Deliverables | source, README, docs, diagrams, env template, Docker files | Delivered as source ZIP. Windows launcher execution pending on target machine. |
