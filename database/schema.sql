@@ -50,3 +50,5 @@ CREATE INDEX IF NOT EXISTS project_chat_threads_owner ON project_chat_threads(pr
 CREATE TABLE IF NOT EXISTS project_chat_messages(id TEXT PRIMARY KEY,thread_id TEXT NOT NULL REFERENCES project_chat_threads(id) ON DELETE CASCADE,role TEXT NOT NULL CHECK(role IN ('user','assistant')),content TEXT NOT NULL,created_at BIGINT NOT NULL);
 CREATE INDEX IF NOT EXISTS project_chat_messages_thread ON project_chat_messages(thread_id,created_at);
 INSERT INTO schema_migrations(version,applied_at) VALUES ('003',0) ON CONFLICT DO NOTHING;
+INSERT INTO schema_migrations(version,applied_at) VALUES ('004',0) ON CONFLICT DO NOTHING;
+INSERT INTO schema_migrations(version,applied_at) VALUES ('005',0) ON CONFLICT DO NOTHING;
