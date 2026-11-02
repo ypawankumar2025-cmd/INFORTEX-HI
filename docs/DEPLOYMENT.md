@@ -26,7 +26,7 @@ Protect that backup: it includes user and project records. Test restoration on a
 
 ## Migrations
 
-`001_initial.sql` and `schema.sql` contain the same initial schema. Startup applies idempotent CREATE/seed statements and records version 001. There are no later migrations yet. Future destructive changes must be versioned and performed with a backup and a maintenance plan; the current mechanism is not a general migration orchestration framework.
+`database/schema.sql` is the idempotent bootstrap schema run at backend startup. It contains the initial tables and records migration versions `001`–`005` for a freshly initialized database. The separate `database/migrations/` directory currently includes versions `001`–`005`; `004` and `005` add notification-history and project-comment indexes. On an *existing* database, startup does **not** automatically execute each migration file as an upgrade framework. Back up data and review/apply needed SQL changes through your approved database change process before validation. For a running Compose database, use `python scripts/verify_migrations.py` and `python scripts/verify_database_indexes.py` to inspect recorded versions and index health. Both verification scripts are read-only. No destructive upgrade automation is included.
 
 ## Operational constraints
 
