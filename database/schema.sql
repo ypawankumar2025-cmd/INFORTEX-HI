@@ -28,6 +28,9 @@ CREATE INDEX IF NOT EXISTS memories_project ON memories(project_id);
 CREATE TABLE IF NOT EXISTS approvals(id TEXT PRIMARY KEY,run_id TEXT UNIQUE NOT NULL REFERENCES runs(id) ON DELETE CASCADE,status TEXT NOT NULL CHECK(status IN ('pending','approved','rejected','changes_requested')),reviewer_id TEXT REFERENCES users(id),feedback TEXT NOT NULL DEFAULT '',reviewed_at BIGINT NOT NULL DEFAULT 0);
 CREATE TABLE IF NOT EXISTS comments(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,user_id TEXT NOT NULL REFERENCES users(id),content TEXT NOT NULL,created_at BIGINT NOT NULL);
 CREATE TABLE IF NOT EXISTS notifications(id TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,content TEXT NOT NULL,is_read INTEGER NOT NULL DEFAULT 0,created_at BIGINT NOT NULL);
+-- Speed up notification history lookups for each user.
+CREATE INDEX IF NOT EXISTS notifications_user_created
+ON notifications (user_id, created_at DESC);
 CREATE TABLE IF NOT EXISTS audit_logs(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL REFERENCES workspaces(id),user_id TEXT NOT NULL REFERENCES users(id),action TEXT NOT NULL,entity_id TEXT NOT NULL,created_at BIGINT NOT NULL);
 CREATE INDEX IF NOT EXISTS audit_workspace ON audit_logs(workspace_id,created_at);
 -- HI AI Chat: private, persistent general conversations (not tied to projects).
