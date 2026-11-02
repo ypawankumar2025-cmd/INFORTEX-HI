@@ -32,6 +32,7 @@ def database_versions():
         capture_output=True,
         text=True,
         check=True,
+        timeout=30,
     )
 
     return [
@@ -58,7 +59,7 @@ def main():
 
     try:
         applied = database_versions()
-    except (OSError, subprocess.CalledProcessError) as error:
+    except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
         print(f"FAIL: Cannot query PostgreSQL: {error}")
         return 1
 

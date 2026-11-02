@@ -40,6 +40,17 @@ class TestMigrationVerification(unittest.TestCase):
              patch.object(vm, "database_versions", side_effect=OSError("Database unavailable")):
             self.assertEqual(vm.main(), 1)
 
+    def test_database_timeout(self):
+        with patch.object(vm, "local_versions", return_value=["001"]), \
+             patch.object(
+                 vm,
+                 "database_versions",
+                 side_effect=vm.subprocess.TimeoutExpired(
+                     cmd="docker", timeout=30
+                 ),
+             ):
+            self.assertEqual(vm.main(), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
