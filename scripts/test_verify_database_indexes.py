@@ -3,17 +3,17 @@ import unittest
 from unittest.mock import patch
 import verify_database_indexes as vi
 
-
 VALID_OUTPUT = (
     "notifications|notifications_user_created|"
     "CREATE INDEX notifications_user_created "
     "ON public.notifications USING btree "
-    "(user_id, created_at DESC)\n"
+    "(user_id, created_at DESC)|t|t\n"
     "comments|comments_project_created|"
     "CREATE INDEX comments_project_created "
     "ON public.comments USING btree "
-    "(project_id, created_at DESC)\n"
+    "(project_id, created_at DESC)|t|t\n"
 )
+
 
 
 class TestDatabaseIndexes(unittest.TestCase):
@@ -56,6 +56,20 @@ class TestDatabaseIndexes(unittest.TestCase):
     def test_database_timeout(self, run):
         run.side_effect = vi.subprocess.TimeoutExpired(
             ["docker"], 30
+        )
+        self.assertEqual(vi.main(), 1)
+
+    @patch.object(vi.subprocess, "run")
+    def test_invalid_index(self, run):
+        run.return_value.stdout = VALID_OUTPUT.replace(
+            "|t|t\n", "|f|t\n", 1
+        )
+        self.assertEqual(vi.main(), 1)
+
+    @patch.object(vi.subprocess, "run")
+    def test_index_not_ready(self, run):
+        run.return_value.stdout = VALID_OUTPUT.replace(
+            "|t|t\n", "|t|f\n", 1
         )
         self.assertEqual(vi.main(), 1)
 

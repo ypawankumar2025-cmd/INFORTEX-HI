@@ -21,9 +21,14 @@ def main():
         "docker", "compose", "exec", "-T", "db",
         "psql", "-U", "hi", "-d", "hi",
         "-At", "-F", "|", "-c",
-        "SELECT tablename, indexname, indexdef FROM pg_indexes "
-        "WHERE schemaname='public' "
-        "AND tablename IN ('notifications','comments');",
+        "SELECT t.relname, idx.relname, pg_get_indexdef(idx.oid), "
+        "i.indisvalid, i.indisready "
+        "FROM pg_index i "
+        "JOIN pg_class idx ON idx.oid=i.indexrelid "
+        "JOIN pg_class t ON t.oid=i.indrelid "
+        "JOIN pg_namespace n ON n.oid=t.relnamespace "
+        "WHERE n.nspname='public' "
+        "AND t.relname IN ('notifications','comments');",
     ]
 
     try:
@@ -46,28 +51,39 @@ def main():
     indexes = {}
 
     for line in result.stdout.splitlines():
-        parts = line.split("|", 2)
-        if len(parts) != 3:
+        parts = line.split("|", 4)
+        if len(parts) != 5:
             print(f"FAIL: Unexpected database output: {line}")
             return 1
 
-        table, name, definition = parts
-        indexes[(table, name)] = definition
+        table, name, definition, is_valid, is_ready = parts
+        indexes[(table, name)] = (definition, is_valid, is_ready)
 
+   
     failed = False
 
     for (table, name), columns in EXPECTED.items():
-        definition = indexes.get((table, name))
+        index_info = indexes.get((table, name))
 
-        if definition is None:
+        if index_info is None:
             print(f"FAIL: Missing index {name}")
             failed = True
-        elif not re.search(
+            continue
+
+        definition, is_valid, is_ready = index_info
+
+        if not re.search(
             r"\bUSING\s+btree\s*" + columns,
             definition,
             re.IGNORECASE,
         ):
             print(f"FAIL: Incorrect index definition for {name}")
+            failed = True
+        elif is_valid != "t" or is_ready != "t":
+            print(
+                f"FAIL: Index {name} unhealthy "
+                f"(valid={is_valid}, ready={is_ready})"
+            )
             failed = True
         else:
             print(f"PASS: {name}")
