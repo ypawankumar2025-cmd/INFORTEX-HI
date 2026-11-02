@@ -68,3 +68,29 @@ Latest follow-up verification: all nine HTTPS transport fixture cases passed. Th
 Latest requirements-audit follow-up: 98 API checks and restart persistence passed. C++ core tests include structured-plan validation; live-mode HTTPS fixture tests additionally verify prior-turn context, rejection of forged caller context, independent conversation isolation, task priorities, dependency edges and milestone persistence after approval. Frontend production build and all 13 tests passed after the review UI changes. Real vendor calls, Docker/PostgreSQL execution and authenticated browser QA remain pending.
 
 Latest routing/index verification: C++ unit tests compare indexed top-five results against brute-force cosine rankings across 20 seven-dimensional queries over 80 vectors, and check zero-vector/dimension/tie boundaries. Router tests reject unsafe agent selection and preserve mandatory constraints. The HTTPS fixture verifies model-selected specialist subsets; API tests verify upload/delete cache refresh and project isolation. Final API run passed 106 checks (polling-dependent count), restart persistence passed, frontend build and 13 tests passed. No vector throughput or high-dimensional scaling claim is made. Docker/PostgreSQL, real credentials, Windows and authenticated browser/mobile acceptance remain unexecuted.
+
+## Leader integration checks (current repository)
+
+The following commands verify the repository structure, public configuration
+contract and React/nginx/Vite proxy mapping *without* starting an application:
+
+```bash
+python3 scripts/check_project_layout.py
+python3 scripts/check_config_contract.py
+python3 scripts/check_proxy_contract.py
+python3 -m unittest discover -s scripts -p "test_*.py"
+```
+
+With Docker Desktop running, `python3 scripts/check_compose_contract.py
+--require-docker` validates the *resolved configuration* (it does not start
+containers). After starting the full stack with `docker compose up --build -d
+--wait`, run `python3 scripts/check_service_health.py` to smoke-test the
+frontend and backend on local port 8080. The health probe only permits
+localhost/127.0.0.1, is read-only, and does not create accounts or records.
+
+The automated GitHub workflow now runs Python tests and configuration checks
+in addition to C++, frontend, and disposable PostgreSQL integration tests.
+Prior execution records above describe historical runs and are not claims that
+new leader changes passed remote CI; verify the new pull request's actual
+checks before merging. Authenticated UI/browser QA, security assessment and
+real model-provider acceptance remain separate tasks.
