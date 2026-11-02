@@ -12,6 +12,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y g++ cmake libasio-dev libssl-dev libcurl4-openssl-dev libsqlite3-dev libpq-dev nlohmann-json3-dev libarchive-dev poppler-utils
+      - name: Verify Python database and integration unit tests
+        run: python3 -m unittest discover -s scripts -p "test_*.py"
       - name: Build and verify C++ and SQLite
         run: |
           cmake -S backend -B build -DCMAKE_BUILD_TYPE=Debug
