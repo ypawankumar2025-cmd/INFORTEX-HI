@@ -20,7 +20,11 @@ public:
       if(!line.empty()&&line.back()=='\r')line.pop_back();
       if(!line.starts_with("data:"))continue;
       auto data=line.substr(5);if(data.starts_with(' '))data.erase(0,1);
-      if(data=="[DONE]"){done_=true;continue;}
+      if(data=="[DONE]"){
+        require(!done_,"Duplicate provider stream completion marker",502);
+        done_=true;
+        continue;
+      }
       require(!done_,"Unexpected data after completed stream",502);
       Json item;
       try { item=Json::parse(data); }

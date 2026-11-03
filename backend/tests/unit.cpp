@@ -69,6 +69,13 @@ int main(int argc, char **argv) {
     catch(const Error &e) { badShapeIs502=(e.status==502); }
     assert(badShapeIs502);
   }
+  bool duplicateDoneRejected=false;
+  try {
+    CompletionStream repeated;
+    repeated.feed("data: {\"choices\":[{\"delta\":{\"content\":\"ok\"}}]}\n\n"
+                  "data: [DONE]\n\ndata: [DONE]\n\n");
+  } catch(const Error &e) { duplicateDoneRejected=e.status==502; }
+  assert(duplicateDoneRejected);
   auto results=WebResearchService::normalize({{"web",{{"results",Json::array({
     {{"url","javascript:alert(1)"}},{{"url","https://example.com"},{"title","Example"},{"description","Excerpt"}}
   })}}}});
