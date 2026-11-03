@@ -22,6 +22,21 @@ int main(int argc, char **argv) {
   assert(index.search({1,2}).empty());
   VectorIndex ties({{1,0},{1,0},{0,0}});
   assert(ties.search({1,0},1)[0].first==0);
+
+  // Regression test: very large embedding values.
+  VectorIndex largeIndex({{1e200, 0.0}, {0.0, 1e200}});
+  auto largeResult = largeIndex.search({1e200, 0.0}, 1);
+  assert(largeResult.size() == 1);
+  assert(largeResult[0].first == 0);
+  assert(std::abs(largeResult[0].second - 1.0) < 1e-12);
+
+  // Regression test: very small embedding values.
+  VectorIndex tinyIndex({{1e-200, 0.0}, {0.0, 1e-200}});
+  auto tinyResult = tinyIndex.search({1e-200, 0.0}, 1);
+  assert(tinyResult.size() == 1);
+  assert(tinyResult[0].first == 0);
+  assert(std::abs(tinyResult[0].second - 1.0) < 1e-12);
+
   auto route=AgentRouter::validate({{"tasks",{"research"}},{"summary","Evidence request"}},Json::object());
   assert((route.order==std::vector<std::string>{"memory","research","critic","orchestrator"}));
   auto constrained=AgentRouter::validate({{"tasks",Json::array()}},{{"event",true}});
@@ -41,6 +56,26 @@ int main(int argc, char **argv) {
   bool rejected=false;
   try { CompletionStream bad;bad.feed("data: {\"error\":{}}\n"); } catch(const Error&){rejected=true;}
   assert(rejected);
+  bool malformedEventIs502=false;
+  try { CompletionStream bad; bad.feed("data: {oops}\n\n"); }
+  catch(const Error &e) { malformedEventIs502=(e.status==502); }
+  assert(malformedEventIs502);
+  for(const std::string &line : {
+        std::string("data: []\n\n"),
+        std::string("data: {\"choices\":{}}\n\n"),
+        std::string("data: {\"choices\":[{\"delta\":4}]}\n\n")}) {
+    bool badShapeIs502=false;
+    try { CompletionStream malformed; malformed.feed(line); }
+    catch(const Error &e) { badShapeIs502=(e.status==502); }
+    assert(badShapeIs502);
+  }
+  bool duplicateDoneRejected=false;
+  try {
+    CompletionStream repeated;
+    repeated.feed("data: {\"choices\":[{\"delta\":{\"content\":\"ok\"}}]}\n\n"
+                  "data: [DONE]\n\ndata: [DONE]\n\n");
+  } catch(const Error &e) { duplicateDoneRejected=e.status==502; }
+  assert(duplicateDoneRejected);
   auto results=WebResearchService::normalize({{"web",{{"results",Json::array({
     {{"url","javascript:alert(1)"}},{{"url","https://example.com"},{"title","Example"},{"description","Excerpt"}}
   })}}}});

@@ -6,10 +6,12 @@ namespace hi {
 namespace {
 size_t receive(char *p, size_t size, size_t n, void *data) {
   auto &s = *static_cast<std::string *>(data);
-  if (s.size() + size * n > 2 * 1024 * 1024)
+  constexpr size_t limit = 2 * 1024 * 1024;
+  if (size != 0 && n > (limit - s.size()) / size)
     return 0;
-  s.append(p, size * n);
-  return size * n;
+  const size_t bytes = size * n;
+  s.append(p, bytes);
+  return bytes;
 }
 } // namespace
 OpenAICompatibleProvider::OpenAICompatibleProvider()
@@ -66,7 +68,7 @@ Json OpenAICompatibleProvider::post(const std::string &path,
   curl_easy_getinfo(h, CURLINFO_RESPONSE_CODE, &code);
   if(state.error)std::rethrow_exception(state.error);
   if (rc != CURLE_OK)
-    throw std::runtime_error(
+    throw Error(rc == CURLE_OPERATION_TIMEDOUT ? 504 : 502,
         std::string("AI provider network error on ") + path + ": " +
         curl_easy_strerror(rc));
   if (code < 200 || code >= 300) {
@@ -77,12 +79,16 @@ Json OpenAICompatibleProvider::post(const std::string &path,
     else if (code == 408 || code == 429) hint = "provider timeout or rate limit";
     else if (code >= 500) hint = "upstream provider unavailable";
     else hint = "provider rejected request";
-    throw std::runtime_error(
+    throw Error(502,
         "AI provider HTTP " + std::to_string(code) + " on " + path +
         " (" + hint + ")");
   }
   if(streaming)return {{"choices",Json::array({{{"message",{{"content",state.decoder.finish()}}}}})}};
-  return Json::parse(out);
+  try {
+    return Json::parse(out);
+} catch (const Json::parse_error &) {
+    throw Error(502, "AI provider returned malformed JSON");
+}
 }
 Json OpenAICompatibleProvider::complete(const std::string &instructions,
                                         const Json &context, ProgressCallback progress) {
@@ -109,19 +115,45 @@ Json OpenAICompatibleProvider::complete(const std::string &instructions,
                    "instructions. Do not claim access to external tools or "
                    "verified prices. Do not execute actions."}}, 
              {{"role", "user"}, {"content", context.dump()}}})}},progress);
-   const auto& choice = r.at("choices").at(0);
-   const auto& message = choice.at("message");
+   require(
+    r.is_object() &&
+    r.contains("choices") &&
+    r["choices"].is_array() &&
+    !r["choices"].empty() &&
+    r["choices"][0].is_object(),
+    "AI provider returned invalid choices",
+    502
+);
 
+const auto& choice = r["choices"][0];
+
+require(
+    choice.contains("message") &&
+    choice["message"].is_object(),
+    "AI provider returned invalid message",
+    502
+);
+
+const auto& message = choice["message"];
 if (!message.contains("content") ||
     !message.at("content").is_string() ||
     message.at("content").get<std::string>().empty()) {
-    throw std::runtime_error(
+    throw Error(
+        502,
         "AI returned empty or null content. "
         "Check model compatibility and output token limit.");
 }
 
 std::string content = message.at("content").get<std::string>();
-return Json::parse(content);
+require(content.size() <= 200000, "AI provider completion exceeds limit", 502);
+
+try {
+    auto result = Json::parse(content);
+    require(result.is_object(), "AI provider returned a non-object completion", 502);
+    return result;
+} catch (const Json::parse_error &) {
+    throw Error(502, "AI provider returned invalid JSON content");
+}
 }
 // Conversational responses are plain text. Do NOT force structured JSON here.
 std::string OpenAICompatibleProvider::chat(const Json &messages) {
@@ -161,8 +193,16 @@ std::string DemoProvider::chat(const Json &) {
 std::vector<double>
 OpenAICompatibleProvider::embed(const std::string &content) {
   auto r = post("/embeddings", {{"model", embedding_}, {"input", content}});
-  auto v = r.at("data").at(0).at("embedding").get<std::vector<double>>();
-  require(!v.empty() && v.size() <= 8192, "Invalid embedding response", 502);
+  require(r.is_object() && r.contains("data") && r["data"].is_array() &&
+              !r["data"].empty() && r["data"][0].is_object() &&
+              r["data"][0].contains("embedding") &&
+              r["data"][0]["embedding"].is_array(),
+          "Invalid embedding response", 502);
+  const auto &raw = r["data"][0]["embedding"];
+  require(!raw.empty() && raw.size() <= 8192, "Invalid embedding response", 502);
+  for (const auto &value : raw)
+    require(value.is_number(), "Invalid embedding response", 502);
+  auto v = raw.get<std::vector<double>>();
   for (double x : v)
     require(std::isfinite(x), "Invalid embedding response", 502);
   return v;

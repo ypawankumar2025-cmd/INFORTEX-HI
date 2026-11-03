@@ -20,12 +20,23 @@ public:
       if(!line.empty()&&line.back()=='\r')line.pop_back();
       if(!line.starts_with("data:"))continue;
       auto data=line.substr(5);if(data.starts_with(' '))data.erase(0,1);
-      if(data=="[DONE]"){done_=true;continue;}
+      if(data=="[DONE]"){
+        require(!done_,"Duplicate provider stream completion marker",502);
+        done_=true;
+        continue;
+      }
       require(!done_,"Unexpected data after completed stream",502);
-      auto item=Json::parse(data);
+      Json item;
+      try { item=Json::parse(data); }
+      catch(const Json::parse_error&) { throw Error(502,"Malformed provider stream event"); }
+      require(item.is_object(),"Invalid provider stream envelope",502);
       require(!item.contains("error"),"Provider reported a stream error",502);
-      if(!item.contains("choices")||item["choices"].empty())continue;
+      if(!item.contains("choices"))continue;
+      require(item["choices"].is_array(),"Invalid stream choices",502);
+      if(item["choices"].empty())continue;
+      require(item["choices"][0].is_object(),"Invalid stream choice",502);
       auto delta=item["choices"][0].value("delta",Json::object());
+      require(delta.is_object(),"Invalid stream delta",502);
       if(delta.contains("content")&&!delta["content"].is_null()){
         require(delta["content"].is_string(),"Invalid model stream content",502);
         content_+=delta["content"].get<std::string>();
