@@ -6,10 +6,12 @@ namespace hi {
 namespace {
 size_t receive(char *p, size_t size, size_t n, void *data) {
   auto &s = *static_cast<std::string *>(data);
-  if (s.size() + size * n > 2 * 1024 * 1024)
+  constexpr size_t limit = 2 * 1024 * 1024;
+  if (size != 0 && n > (limit - s.size()) / size)
     return 0;
-  s.append(p, size * n);
-  return size * n;
+  const size_t bytes = size * n;
+  s.append(p, bytes);
+  return bytes;
 }
 } // namespace
 OpenAICompatibleProvider::OpenAICompatibleProvider()
