@@ -66,7 +66,7 @@ Json OpenAICompatibleProvider::post(const std::string &path,
   curl_easy_getinfo(h, CURLINFO_RESPONSE_CODE, &code);
   if(state.error)std::rethrow_exception(state.error);
   if (rc != CURLE_OK)
-    throw std::runtime_error(
+    throw Error(rc == CURLE_OPERATION_TIMEDOUT ? 504 : 502,
         std::string("AI provider network error on ") + path + ": " +
         curl_easy_strerror(rc));
   if (code < 200 || code >= 300) {
