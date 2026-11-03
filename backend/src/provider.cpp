@@ -145,7 +145,9 @@ if (!message.contains("content") ||
 std::string content = message.at("content").get<std::string>();
 
 try {
-    return Json::parse(content);
+    auto result = Json::parse(content);
+    require(result.is_object(), "AI provider returned a non-object completion", 502);
+    return result;
 } catch (const Json::parse_error &) {
     throw Error(502, "AI provider returned invalid JSON content");
 }
