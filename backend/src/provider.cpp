@@ -188,8 +188,14 @@ std::string DemoProvider::chat(const Json &) {
 std::vector<double>
 OpenAICompatibleProvider::embed(const std::string &content) {
   auto r = post("/embeddings", {{"model", embedding_}, {"input", content}});
-  auto v = r.at("data").at(0).at("embedding").get<std::vector<double>>();
-  require(!v.empty() && v.size() <= 8192, "Invalid embedding response", 502);
+  require(r.is_object() && r.contains("data") && r["data"].is_array() &&
+              !r["data"].empty() && r["data"][0].is_object() &&
+              r["data"][0].contains("embedding") &&
+              r["data"][0]["embedding"].is_array(),
+          "Invalid embedding response", 502);
+  const auto &raw = r["data"][0]["embedding"];
+  require(!raw.empty() && raw.size() <= 8192, "Invalid embedding response", 502);
+  auto v = raw.get<std::vector<double>>();
   for (double x : v)
     require(std::isfinite(x), "Invalid embedding response", 502);
   return v;
