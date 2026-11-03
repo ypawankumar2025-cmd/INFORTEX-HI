@@ -195,6 +195,8 @@ OpenAICompatibleProvider::embed(const std::string &content) {
           "Invalid embedding response", 502);
   const auto &raw = r["data"][0]["embedding"];
   require(!raw.empty() && raw.size() <= 8192, "Invalid embedding response", 502);
+  for (const auto &value : raw)
+    require(value.is_number(), "Invalid embedding response", 502);
   auto v = raw.get<std::vector<double>>();
   for (double x : v)
     require(std::isfinite(x), "Invalid embedding response", 502);

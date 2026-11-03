@@ -41,7 +41,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('Content-Type', 'text/event-stream' if streaming else 'application/json')
         self.end_headers()
         if self.path.endswith('/embeddings'):
-            vector = [] if scenario == 'empty_embedding' else [0.6, 0.8]
+            vector = [] if scenario == 'empty_embedding' else (['not-a-number', 0.8] if scenario == 'non_numeric_embedding' else [0.6, 0.8])
             result = {'data': [{}]} if scenario == 'invalid_embedding_shape' else {'data': [{'embedding': vector}]}
             self.wfile.write(json.dumps(result).encode())
         elif streaming:
@@ -69,12 +69,12 @@ with tempfile.TemporaryDirectory(prefix='hi-tls-') as temp:
     server.socket = context.wrap_socket(server.socket, server_side=True)
     worker = threading.Thread(target=server.serve_forever, daemon=True); worker.start()
     env = {**os.environ, 'LLM_BASE_URL': f'https://127.0.0.1:{server.server_port}/v1', 'LLM_API_KEY': 'local-fixture-only', 'LLM_CA_BUNDLE': str(ca), 'NO_PROXY': '127.0.0.1', 'no_proxy': '127.0.0.1'}
-    cases = [('normal', False, False), ('normal', True, False), ('invalid_json', False, True), ('invalid_json', True, True), ('truncated', True, True), ('stream_error', True, True), ('empty_embedding', False, True), ('invalid_embedding_shape', False, True), ('http_error', False, True), ('untrusted_certificate', False, True)]
+    cases = [('normal', False, False), ('normal', True, False), ('invalid_json', False, True), ('invalid_json', True, True), ('truncated', True, True), ('stream_error', True, True), ('empty_embedding', False, True), ('invalid_embedding_shape', False, True), ('non_numeric_embedding', False, True), ('http_error', False, True), ('untrusted_certificate', False, True)]
     try:
         for scenario, streaming, rejects in cases:
             state.update(scenario=scenario, requests=0)
             testenv = {**env, 'LLM_STREAMING': str(streaming).lower()}
-            if scenario in ('invalid_json', 'invalid_embedding_shape'):
+            if scenario in ('invalid_json', 'invalid_embedding_shape', 'non_numeric_embedding'):
                 testenv['HI_EXPECT_502'] = 'true'
             if scenario == 'untrusted_certificate':
                 testenv['LLM_CA_BUNDLE'] = ''
