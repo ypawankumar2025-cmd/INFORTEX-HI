@@ -60,6 +60,15 @@ int main(int argc, char **argv) {
   try { CompletionStream bad; bad.feed("data: {oops}\n\n"); }
   catch(const Error &e) { malformedEventIs502=(e.status==502); }
   assert(malformedEventIs502);
+  for(const std::string &line : {
+        std::string("data: []\n\n"),
+        std::string("data: {\"choices\":{}}\n\n"),
+        std::string("data: {\"choices\":[{\"delta\":4}]}\n\n")}) {
+    bool badShapeIs502=false;
+    try { CompletionStream malformed; malformed.feed(line); }
+    catch(const Error &e) { badShapeIs502=(e.status==502); }
+    assert(badShapeIs502);
+  }
   auto results=WebResearchService::normalize({{"web",{{"results",Json::array({
     {{"url","javascript:alert(1)"}},{{"url","https://example.com"},{"title","Example"},{"description","Excerpt"}}
   })}}}});
