@@ -56,6 +56,10 @@ int main(int argc, char **argv) {
   bool rejected=false;
   try { CompletionStream bad;bad.feed("data: {\"error\":{}}\n"); } catch(const Error&){rejected=true;}
   assert(rejected);
+  bool malformedEventIs502=false;
+  try { CompletionStream bad; bad.feed("data: {oops}\n\n"); }
+  catch(const Error &e) { malformedEventIs502=(e.status==502); }
+  assert(malformedEventIs502);
   auto results=WebResearchService::normalize({{"web",{{"results",Json::array({
     {{"url","javascript:alert(1)"}},{{"url","https://example.com"},{"title","Example"},{"description","Excerpt"}}
   })}}}});

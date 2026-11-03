@@ -22,7 +22,9 @@ public:
       auto data=line.substr(5);if(data.starts_with(' '))data.erase(0,1);
       if(data=="[DONE]"){done_=true;continue;}
       require(!done_,"Unexpected data after completed stream",502);
-      auto item=Json::parse(data);
+      Json item;
+      try { item=Json::parse(data); }
+      catch(const Json::parse_error&) { throw Error(502,"Malformed provider stream event"); }
       require(!item.contains("error"),"Provider reported a stream error",502);
       if(!item.contains("choices")||item["choices"].empty())continue;
       auto delta=item["choices"][0].value("delta",Json::object());
