@@ -14,13 +14,35 @@ class VectorIndex {
   std::vector<Node> nodes_;
   size_t dimensions_=0;
   int root_=-1;
+
   static bool normalize(std::vector<double>& v) {
-    double norm=0;
-    for(double x:v){require(std::isfinite(x),"Invalid indexed vector");norm+=x*x;}
-    if(norm==0)return false;
-    require(std::isfinite(norm),"Invalid vector magnitude");
-    norm=std::sqrt(norm);for(double& x:v)x/=norm;return true;
-  }
+    double scale = 0.0;
+
+    for (double x : v) {
+        require(std::isfinite(x), "Invalid indexed vector");
+        scale = std::max(scale, std::abs(x));
+    }
+
+    if (scale == 0.0) {
+        return false;
+    }
+
+    double squaredNorm = 0.0;
+
+    for (double x : v) {
+        double scaled = x / scale;
+        squaredNorm += scaled * scaled;
+    }
+
+    double inverseNorm = 1.0 / std::sqrt(squaredNorm);
+
+    for (double& x : v) {
+        x = (x / scale) * inverseNorm;
+    }
+
+    return true;
+}
+
   int build(std::vector<size_t>& order,size_t first,size_t last,size_t depth) {
     if(first==last)return -1;
     size_t axis=depth%dimensions_,mid=first+(last-first)/2;
