@@ -15,9 +15,19 @@ int main(int argc, char** argv) {
     require(result.at("summary")=="Hello ₹","Completion payload mismatch");
     if(env("LLM_STREAMING")=="true")require(!draft.empty(),"No stream progress callback");
     if(expectFailure){std::cerr<<"Invalid upstream response was accepted\n";return 1;}
-  }catch(const std::exception&){
-    if(!expectFailure){std::cerr<<"Expected successful provider request\n";return 1;}
+  } catch (const Error &e) {
+  if (!expectFailure ||
+      (env("HI_EXPECT_502", "false") == "true" && e.status != 502)) {
+    std::cerr << "Unexpected provider error: "
+              << e.what() << " (status " << e.status << ")\n";
+    return 1;
   }
-  curl_global_cleanup();
+} catch (const std::exception &e) {
+  if (!expectFailure || env("HI_EXPECT_502", "false") == "true") {
+    std::cerr << "Unexpected exception: " << e.what() << "\n";
+    return 1;
+  }
+}
+curl_global_cleanup();
   return 0;
 }

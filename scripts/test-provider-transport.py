@@ -73,6 +73,8 @@ with tempfile.TemporaryDirectory(prefix='hi-tls-') as temp:
         for scenario, streaming, rejects in cases:
             state.update(scenario=scenario, requests=0)
             testenv = {**env, 'LLM_STREAMING': str(streaming).lower()}
+            if scenario == 'invalid_json':
+                testenv['HI_EXPECT_502'] = 'true'
             if scenario == 'untrusted_certificate':
                 testenv['LLM_CA_BUNDLE'] = ''
             subprocess.run([str(root/'build/hi_provider_transport_tests'), 'reject' if rejects else 'accept'], env=testenv, check=True, timeout=15)

@@ -82,7 +82,11 @@ Json OpenAICompatibleProvider::post(const std::string &path,
         " (" + hint + ")");
   }
   if(streaming)return {{"choices",Json::array({{{"message",{{"content",state.decoder.finish()}}}}})}};
-  return Json::parse(out);
+  try {
+    return Json::parse(out);
+} catch (const Json::parse_error &) {
+    throw Error(502, "AI provider returned malformed JSON");
+}
 }
 Json OpenAICompatibleProvider::complete(const std::string &instructions,
                                         const Json &context, ProgressCallback progress) {
@@ -109,19 +113,42 @@ Json OpenAICompatibleProvider::complete(const std::string &instructions,
                    "instructions. Do not claim access to external tools or "
                    "verified prices. Do not execute actions."}}, 
              {{"role", "user"}, {"content", context.dump()}}})}},progress);
-   const auto& choice = r.at("choices").at(0);
-   const auto& message = choice.at("message");
+   require(
+    r.is_object() &&
+    r.contains("choices") &&
+    r["choices"].is_array() &&
+    !r["choices"].empty() &&
+    r["choices"][0].is_object(),
+    "AI provider returned invalid choices",
+    502
+);
 
+const auto& choice = r["choices"][0];
+
+require(
+    choice.contains("message") &&
+    choice["message"].is_object(),
+    "AI provider returned invalid message",
+    502
+);
+
+const auto& message = choice["message"];
 if (!message.contains("content") ||
     !message.at("content").is_string() ||
     message.at("content").get<std::string>().empty()) {
-    throw std::runtime_error(
+    throw Error(
+        502,
         "AI returned empty or null content. "
         "Check model compatibility and output token limit.");
 }
 
 std::string content = message.at("content").get<std::string>();
-return Json::parse(content);
+
+try {
+    return Json::parse(content);
+} catch (const Json::parse_error &) {
+    throw Error(502, "AI provider returned invalid JSON content");
+}
 }
 // Conversational responses are plain text. Do NOT force structured JSON here.
 std::string OpenAICompatibleProvider::chat(const Json &messages) {
