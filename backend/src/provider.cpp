@@ -77,7 +77,7 @@ Json OpenAICompatibleProvider::post(const std::string &path,
     else if (code == 408 || code == 429) hint = "provider timeout or rate limit";
     else if (code >= 500) hint = "upstream provider unavailable";
     else hint = "provider rejected request";
-    throw std::runtime_error(
+    throw Error(502,
         "AI provider HTTP " + std::to_string(code) + " on " + path +
         " (" + hint + ")");
   }
