@@ -143,6 +143,7 @@ if (!message.contains("content") ||
 }
 
 std::string content = message.at("content").get<std::string>();
+require(content.size() <= 200000, "AI provider completion exceeds limit", 502);
 
 try {
     auto result = Json::parse(content);
