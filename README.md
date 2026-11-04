@@ -1,3 +1,8 @@
+## 🌍 Live Website
+
+🚀 [Visit INFORTEX HI](https://infortex-hi.onrender.com)
+
+Built with React, C++, PostgreSQL, Docker, and AI.
 # INFORTEX-HI
 
 “Where human thinking leads, technology follows — HI — Human Intelligence by Infortex.”
