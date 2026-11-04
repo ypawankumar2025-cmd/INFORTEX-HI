@@ -1,0 +1,151 @@
+/* INFORTEX HI — Cinematic Orange & Black
+   Workspace theme inspired by the existing cinematic homepage.
+   All overrides are restricted to [data-hi-theme="orange"].
+   The five pre-existing theme palettes remain unchanged. */
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) {
+  color-scheme: dark;
+  --ht-bg: #080809;
+  --ht-main: #0d0d0f;
+  --ht-sidebar: #080809;
+  --ht-sidebar-text: #f5f3f0;
+  --ht-card: #171719;
+  --ht-card-alt: #211b17;
+  --ht-text: #f5f3f0;
+  --ht-muted: #c2b8b0;
+  --ht-line: #42352b;
+  --ht-accent: #ff6b13;
+  --ht-accent-text: #160a03;
+  --ht-warm: #ffa45d;
+  --ht-button: #ff6b13;
+  --ht-button-text: #160a03;
+  --ht-soft: #322016;
+  --ht-shadow: #0000007d;
+  --ht-heading: "Segoe UI", Inter, Arial, sans-serif;
+  --ht-radius: 12px;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .main-shell {
+  background: radial-gradient(ellipse at 95% 4%, #2b160f 0, transparent 40%), #0d0d0f !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .sidebar {
+  background: linear-gradient(170deg, #0b0b0d 0%, #17100d 100%) !important;
+  border-right: 1px solid #57351f !important;
+  box-shadow: 2px 0 26px #0008 !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .sidebar nav button.active,
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .sidebar nav button.active:hover {
+  background: linear-gradient(110deg, #ff6b13, #ff903a) !important;
+  color: #160a03 !important;
+  border-color: #ffb16a !important;
+  box-shadow: 0 5px 22px #ff6b1344 !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .sidebar nav button.active svg { color: #160a03 !important; }
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .page-head .eyebrow,
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-eyebrow { color: #ff8a34 !important; }
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) :is(.panel,.stat,.project-card,.agent-card,.kanban-column,.task-card,.hi-chat-shell,.hi-chat-bubble,.composer) {
+  border-color: #42352b !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) :is(.panel,.stat,.project-card,.agent-card) {
+  box-shadow: 0 9px 27px #00000052, inset 0 1px #ffffff08 !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .button.primary,
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-chat-send,
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-chat-new {
+  background: #ff6b13 !important; color: #160a03 !important;
+  border-color: #ffa45d !important;
+  box-shadow: 0 5px 19px #ff6b1329 !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .button.primary svg,
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-chat-send svg { color: #160a03 !important; }
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) :is(.button,.hi-chat-send,.sidebar nav button):focus-visible {
+  outline: 2px solid #ffb06a !important; outline-offset: 3px;
+}
+/* Remove blue/red decoration inherited from the original blue styles. */
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .stat::before {
+  background:linear-gradient(90deg,#ff6b13,#ffb369 72%,#a94715) !important;
+  box-shadow:0 0 14px #ff6b133d !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) :is(.project-symbol,.agent-icon,.studio-mark,.workspace-avatar) {
+  background:linear-gradient(150deg,#522816,#231510) !important;
+  border-color:#98522e !important;
+  color:#ffae69 !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) :is(.progress-track>span,.hi-chat-welcome::before) {
+  background:linear-gradient(90deg,#ff6b13,#ffae69) !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) :is(.nav-new,.notification-dot) {
+  color:#160a03 !important;
+}
+/* Cinematic hero: orange orbit on the right, readable copy on the left. */
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .welcome-banner.hi-theme-hero {
+  min-height:385px !important;
+  background:
+    radial-gradient(circle at 78% 50%, #ff6b1330 0, transparent 36%),
+    radial-gradient(ellipse at 60% 118%, #712f134b 0, transparent 58%),
+    linear-gradient(125deg, #0b0b0d 0%, #19100d 65%, #0a0a0b 100%) !important;
+  border:1px solid #a54e20 !important;
+  box-shadow:0 18px 49px #0009, inset 0 1px #ffb56d30 !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-hero .hi-hero-copy h2 {
+  color:#f5f3f0 !important;
+  font-family:Impact, "Arial Narrow", "Segoe UI", sans-serif !important;
+  font-size:clamp(42px,4.4vw,70px) !important;
+  line-height:.98 !important;
+  letter-spacing:-.02em !important;
+  text-transform:uppercase !important;
+  font-weight:850 !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-hero .hi-hero-copy h2 span { color: #ff6b13 !important; }
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-hero .hi-hero-copy p { color: #d5c8bd !important; }
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-hero .hi-hero-copy .badge {
+  background: #382013 !important; color: #ffb976 !important; border-color: #9a4c21 !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-hero .text-button {
+  background: #ff6b13 !important; color: #160a03 !important;
+  border-color:#ffad67 !important; border-radius:6px !important;
+  box-shadow:0 7px 24px #ff6b1347 !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-hero .hi-hero-decoration {
+  min-height:295px !important; position:relative !important;
+  isolation:isolate; overflow:hidden !important;
+  border-radius:18px !important;
+  background:radial-gradient(circle at 50% 50%, #ff8a292b 0, transparent 60%) !important;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-hero .hi-hero-decoration::before {
+  content:""; display:block; position:absolute; width:min(290px,80%); aspect-ratio:1;
+  top:50%; left:50%; transform:translate(-50%,-50%) rotate(-22deg);
+  border:2px solid #ff8428; border-radius:50%;
+  box-shadow:0 0 0 24px #ff6b1320,0 0 0 55px #ff6b1309,0 0 42px #ff6b1345,inset 0 0 42px #ff6b1326;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-hero .hi-hero-decoration::after {
+  content:"HI"; display:grid; place-items:center; position:absolute;
+  width:120px; height:120px; border-radius:50%;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  background:radial-gradient(circle at 38% 30%, #ffb766, #ff6b13 52%, #a93205);
+  color:#140903; font:900 61px/1 Impact,"Arial Narrow",sans-serif;
+  letter-spacing:-.07em; border:2px solid #ffb56b;
+  box-shadow:0 0 36px #ff6b1370,inset 0 0 15px #ffffff30;
+}
+/* Themes page selection: the orange button retains dark, readable text. */
+.hi-theme-choice-orange .hi-theme-apply { color:#160a03; }
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-choice.is-active { border-color:#ff6b13; }
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-reset {
+  background:#ff6b13; border-color:#ffae69; color:#160a03;
+}
+html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-reset:focus-visible {
+  outline:2px solid #ffb569; outline-offset:3px;
+}
+@media (max-width:730px) {
+  html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .welcome-banner.hi-theme-hero {
+    grid-template-columns:1fr !important; padding:24px !important;
+  }
+  html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-hero .hi-hero-copy h2 {
+    font-size:clamp(38px,10vw,55px) !important;
+  }
+  html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-hero .hi-hero-decoration { min-height:205px !important; }
+  html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-hero .hi-hero-decoration::before {width:170px;}
+  html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-hero .hi-hero-decoration::after {width:86px;height:86px;font-size:42px;}
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .hi-theme-choice,
+  html[data-hi-theme="orange"]:not([data-hi-theme="blue"]) .sidebar nav button { transition:none !important; }
+}

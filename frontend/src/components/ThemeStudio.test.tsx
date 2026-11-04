@@ -28,7 +28,7 @@ describe("INFOTEX HI Theme Studio", () => {
     expect(onSelect).toHaveBeenCalledWith("noir");
   });
 
-  it("restores the default Blue Glass theme", () => {
+  it("restores the default Cinematic Orange theme", () => {
     const onSelect = vi.fn();
 
     const { rerender } = render(
@@ -36,20 +36,20 @@ describe("INFOTEX HI Theme Studio", () => {
     );
 
     const resetButton = screen.getByRole("button", {
-      name: /Restore original blue/i,
+      name: /Restore cinematic default/i,
     });
 
     expect((resetButton as HTMLButtonElement).disabled).toBe(false);
 
     fireEvent.click(resetButton);
 
-    expect(onSelect).toHaveBeenCalledWith("blue");
+    expect(onSelect).toHaveBeenCalledWith("orange");
 
     rerender(
       <ThemeStudio selected="blue" onSelect={onSelect} />
     );
 
-    expect((resetButton as HTMLButtonElement).disabled).toBe(true);
+    expect((resetButton as HTMLButtonElement).disabled).toBe(false);
   });
 });
 

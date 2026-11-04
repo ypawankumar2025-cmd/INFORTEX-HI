@@ -8,6 +8,8 @@ import "./hi-cinematic-glass-everywhere.css";
 import "./hi-handshake-glass-menu.css";
 import "./hi-theme-studio.css";
 import "./hi-project-details-polish.css";
+import "./hi-orange-cinema.css";
+import "./hi-orange-overview.css";
 import { applyTheme, readSavedTheme } from "./theme-system";
 applyTheme(readSavedTheme());
 class ErrorBoundary extends React.Component<

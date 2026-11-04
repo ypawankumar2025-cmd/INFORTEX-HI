@@ -1,0 +1,95 @@
+/* INFORTEX HI — User-approved cybernetic login scene.
+   Scope: Auth page only; the existing React Form, auth APIs, theme system,
+   workspace, and cinematic homepage remain unchanged. */
+.hi-cinema-auth {
+  background: #070505;
+  color: #f6f1ee;
+}
+.hi-cinema-auth::before {
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background: radial-gradient(ellipse 48% 73% at 54% 42%, rgba(225,67,2,.14), transparent 75%),
+              radial-gradient(ellipse 43% 35% at 0% 96%, rgba(255,83,0,.15), transparent 83%);
+}
+.hi-cinema-auth-header {max-width:none; position:relative;z-index:4; min-height:86px;
+  border-bottom:1px solid rgba(255,116,29,.28); padding:14px clamp(20px,3.5vw,66px);
+  background:linear-gradient(90deg,rgba(9,7,6,.97),rgba(9,7,6,.42),rgba(9,7,6,.97));}
+.hi-cinema-auth-main {position:relative; isolation:isolate; max-width:none; width:100%;
+  min-height:calc(100svh - 148px); grid-template-columns:minmax(0,1fr) minmax(385px, min(34.5vw,540px));
+  gap:0; padding:clamp(26px,3vh,44px) clamp(20px,3.4vw,68px) 34px;
+  align-items:center; overflow:hidden;}
+.hi-cinema-auth-main::before {content:""; position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(5,4,4,.79) 0%,rgba(5,4,4,.36) 23%,rgba(5,4,4,.03) 43%,rgba(5,4,4,.19) 66%,rgba(5,4,4,.82) 100%);}
+.hi-cinema-auth-portrait {position:absolute; z-index:-1; pointer-events:none;
+  left:52.5%;top:51%;transform:translate(-50%,-50%);
+  width:clamp(500px,43vw,770px);height:calc(100% + 20px);max-height:1060px;
+  object-fit:cover; object-position:53% 42%;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 13%,#000 82%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 13%,#000 82%,transparent 100%);
+  filter:contrast(1.1) saturate(1.11) drop-shadow(0 0 40px rgba(255,92,0,.16));}
+.hi-cinema-auth-story {position:relative;z-index:2; width:min(40vw,540px);max-width:100%;text-align:left;
+  align-self:center; padding:10px 0 12px;}
+.hi-cinema-auth-story h1 {font-size:clamp(59px,5.15vw,88px);line-height:.93;
+  letter-spacing:-.037em; margin:26px 0 21px; text-shadow:0 5px 36px #070505b8;}
+.hi-cinema-auth-story h1 em {color:#ff6810;}
+.hi-cinema-auth-story>p {max-width:445px; color:#e7d5c7; font-size:clamp(13px,1.06vw,16px);
+  line-height:1.75; text-shadow:0 2px 22px #000;}
+.hi-cinema-auth-kicker {font-size:clamp(9px,.7vw,11px);color:#e6d4c5;letter-spacing:.22em;}
+.hi-cinema-auth-orbit {height:235px;width:min(100%,365px); margin:17px 0 18px;}
+.hi-cinema-auth-ring {width:208px;height:208px;border-color:rgba(255,124,18,.40)}
+.hi-cinema-auth-ring.ring-two {width:290px;height:290px;max-height:98%;}
+.hi-cinema-auth-orbit-center {width:136px;height:136px;box-shadow:0 0 25px rgba(255,86,0,.14),inset 0 0 22px rgba(255,95,0,.11);}
+.hi-cinema-auth-trust {color:#d7c7b8;text-shadow:0 1px 12px #000;}
+.hi-cinema-auth-card {position:relative;z-index:3;justify-self:end;
+  width:100%;max-width:535px; padding:clamp(25px,2.4vw,42px);
+  background:linear-gradient(165deg,rgba(25,15,10,.93),rgba(13,9,9,.96));
+  border:1px solid #fe781d; border-radius:24px;
+  box-shadow:0 0 0 2px rgba(255,110,17,.10),0 0 32px rgba(255,83,0,.25),0 26px 100px #000b,
+             inset 0 1px rgba(255,198,123,.12);}
+.hi-cinema-auth-card-top {display:none;}
+.hi-cinema-auth-card h2 {font-size:clamp(35px,3vw,51px);line-height:.98;margin:13px 0 16px;
+  color:#f9f5f1;}
+.hi-cinema-auth-tabs {margin:0 0 30px;border-color:#5e371f;box-shadow:0 4px 14px #0004;}
+.hi-cinema-auth-tabs button {padding:15px 10px;font-size:14px;}
+.hi-cinema-auth-tabs button.active {background:linear-gradient(115deg,#ff8d0b,#ff670b);}
+.hi-cinema-auth-subtitle {color:#e4d3c7;font-size:14px;}
+.hi-cinema-auth-card form {gap:20px;}
+.hi-cinema-auth-card input:not([type="checkbox"]) {min-height:56px;background:rgba(7,7,7,.88)!important;
+  border-color:#695040!important;font-size:14px;}
+.hi-cinema-auth-card form .button,.hi-cinema-auth-card form button[type="submit"] {
+  margin-top:5px;min-height:58px;background:linear-gradient(110deg,#ff9c09,#ff680e)!important;
+  box-shadow:0 9px 38px rgba(255,89,0,.23);}
+.hi-cinema-auth-secure {color:#ccb5a4;}
+.hi-cinema-auth-footer {max-width:none;position:relative;z-index:2;background:#0d0805;
+  border-top:1px solid rgba(255,113,33,.26);padding:18px clamp(20px,3.5vw,66px);}
+@media (max-width:1100px) {
+  .hi-cinema-auth-main {grid-template-columns:minmax(0,1fr) minmax(350px,44vw);}
+  .hi-cinema-auth-story {width:min(44vw,455px);text-align:left;}
+  .hi-cinema-auth-story h1 {font-size:clamp(54px,6.5vw,75px);}
+  .hi-cinema-auth-portrait {width:clamp(390px,46vw,570px);left:52%;opacity:.74;}
+  .hi-cinema-auth-orbit {transform:scale(.9);transform-origin:top left;margin-bottom:-2px;}
+}
+@media (max-width:820px) {
+  .hi-cinema-auth-main {display:flex;flex-direction:column;gap:24px;min-height:0;padding:44px 21px 50px;overflow:hidden;}
+  .hi-cinema-auth-main::before {background:linear-gradient(180deg,rgba(5,4,4,.34),rgba(5,4,4,.78) 42%,#090605 85%);}
+  .hi-cinema-auth-portrait {left:auto;right:-130px;top:0;transform:none;width:540px;height:520px;
+    max-height:none;opacity:.53;object-position:center 33%;}
+  .hi-cinema-auth-story {align-self:stretch;width:100%;max-width:650px;min-height:280px;}
+  .hi-cinema-auth-story h1 {font-size:clamp(57px,9.5vw,90px);}
+  .hi-cinema-auth-story>p {max-width:430px;}
+  .hi-cinema-auth-orbit {display:none;}
+  .hi-cinema-auth-trust {margin-top:20px;}
+  .hi-cinema-auth-card {align-self:center;justify-self:center;width:min(100%,550px);}
+}
+@media (max-width:520px) {
+  .hi-cinema-auth-header {padding:12px 17px;}
+  .hi-cinema-auth-brand-copy small {font-size:7px;}
+  .hi-cinema-auth-main {padding:24px 17px 38px;gap:19px;}
+  .hi-cinema-auth-portrait {width:340px;height:390px;right:-135px;top:-5px;opacity:.38;}
+  .hi-cinema-auth-story {min-height:230px;}
+  .hi-cinema-auth-story h1 {font-size:clamp(50px,11.6vw,65px);margin:24px 0 14px;}
+  .hi-cinema-auth-story>p {font-size:12px;max-width:290px;}
+  .hi-cinema-auth-card {padding:22px 17px;border-radius:16px;}
+  .hi-cinema-auth-card h2 {font-size:37px;}
+  .hi-cinema-auth-card .hi-cinema-auth-tabs {margin-bottom:22px;}
+  .hi-cinema-auth-footer {padding:16px 17px;}
+}

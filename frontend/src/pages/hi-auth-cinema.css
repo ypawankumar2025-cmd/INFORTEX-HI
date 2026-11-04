@@ -1,0 +1,127 @@
+/* INFORTEX HI • Auth screen only. No changes to other themes or pages. */
+.hi-cinema-auth {
+  --auth-ink: #080809; --auth-paper: #f0eee8; --auth-orange: #ff6b13;
+  position: relative; isolation: isolate; min-height: 100vh; overflow: hidden;
+  background: radial-gradient(ellipse 60% 58% at 83% 46%,rgba(125,46,9,.24),transparent 75%),
+    radial-gradient(ellipse 54% 40% at 8% 92%,rgba(255,102,12,.10),transparent 76%),#080809;
+  color: var(--auth-paper); font-family: Inter,"Segoe UI",Arial,sans-serif;
+}
+.hi-cinema-auth * { box-sizing: border-box; }
+.hi-cinema-auth-glow {position:absolute;z-index:-1;pointer-events:none;inset:0;
+  background:linear-gradient(110deg,transparent 24%,rgba(255,97,8,.035) 54%,transparent 81%);
+}
+.hi-cinema-auth-header {display:flex;align-items:center;justify-content:space-between;gap:18px;
+  min-height:92px;max-width:1500px;margin:auto;padding:18px clamp(20px,5vw,85px);
+  border-bottom:1px solid rgba(255,133,64,.18)}
+.hi-cinema-auth-brand {display:flex;align-items:center;gap:15px;color:inherit;text-decoration:none}
+.hi-cinema-auth-monogram {width:64px;height:56px;display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,107,19,.35);border-radius:13px;background:#1d110c;
+  font:900 29px/1 Impact,"Arial Narrow",sans-serif;letter-spacing:-1.5px}
+.hi-cinema-auth-monogram span,.hi-cinema-auth-brand-copy em {color:var(--auth-orange);font-style:normal}
+.hi-cinema-auth-brand-copy {display:grid;gap:7px}
+.hi-cinema-auth-brand-copy b {font-size:17px;letter-spacing:.045em}
+.hi-cinema-auth-brand-copy small {font-size:9px;color:#b3a398;letter-spacing:.2em;font-weight:800}
+.hi-cinema-auth-home {display:inline-flex;gap:9px;align-items:center;text-decoration:none;color:#d6c6b9;
+  font-size:12px;font-weight:750;padding:11px 15px;border-radius:99px;border:1px solid rgba(255,125,55,.27);transition:.2s}
+.hi-cinema-auth-home:hover {color:#fff;border-color:var(--auth-orange);background:#2a160d}
+.hi-cinema-auth-main {max-width:1500px;min-height:calc(100vh - 162px);margin:auto;display:grid;
+  grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:clamp(30px,5vw,90px);
+  align-items:center;padding:38px clamp(20px,5vw,85px) 56px}
+.hi-cinema-auth-story {position:relative;min-width:0;padding-bottom:6px}
+.hi-cinema-auth-kicker {display:inline-flex;align-items:center;gap:12px;font-size:11px;font-weight:850;
+  color:#ffa66b;letter-spacing:.23em}
+.hi-cinema-auth-kicker > span {width:27px;height:3px;background:var(--auth-orange);border-radius:20px;box-shadow:0 0 16px #ff6b13}
+.hi-cinema-auth-story h1 {font:900 clamp(54px,6vw,105px)/.98 Impact,"Arial Narrow",sans-serif;
+  letter-spacing:-.025em;margin:27px 0 20px;color:#f7f5f2;text-transform:uppercase}
+.hi-cinema-auth-story h1 em {color:var(--auth-orange);font-style:normal;
+  text-shadow:0 8px 40px rgba(255,92,0,.17)}
+.hi-cinema-auth-story > p {max-width:530px;line-height:1.8;font-size:15px;color:#c7b8ad;margin:0 0 18px}
+.hi-cinema-auth-orbit {position:relative;width:min(100%,440px);height:280px;display:grid;place-items:center;margin:12px 0 12px}
+.hi-cinema-auth-ring {position:absolute;border:1px solid rgba(255,126,33,.22);border-radius:50%;width:242px;height:242px}
+.hi-cinema-auth-ring.ring-two {width:325px;height:325px;max-height:100%;max-width:95%;border-style:dashed;border-color:rgba(255,132,51,.12)}
+.hi-cinema-auth-orbit-center {position:relative;width:142px;height:142px;border:1px solid rgba(255,130,44,.55);
+  border-radius:32px;display:grid;place-content:center;text-align:center;background:linear-gradient(135deg,#30190d,#0b0a0a);
+  box-shadow:inset 0 0 32px rgba(255,116,20,.08),0 0 60px rgba(255,83,0,.07)}
+.hi-cinema-auth-orbit-center > span {font:900 72px/.85 Impact,"Arial Narrow",sans-serif;letter-spacing:-5px}
+.hi-cinema-auth-orbit-center > span span {color:var(--auth-orange)}
+.hi-cinema-auth-orbit-center small {color:#b3a49b;font-size:9px;letter-spacing:.12em;margin-top:11px}
+.hi-cinema-auth-orbit-chip {position:absolute;display:flex;align-items:center;gap:8px;padding:12px 14px;
+  border:1px solid rgba(255,111,18,.45);border-radius:8px;background:#1d100b;color:#f9e9dc;
+  box-shadow:0 8px 30px #0007;font-size:10px;font-weight:850;letter-spacing:.08em;white-space:nowrap}
+.hi-cinema-auth-orbit-chip svg {color:var(--auth-orange)}
+.hi-cinema-auth-orbit-chip.chip-one {top:8px;left:0}
+.hi-cinema-auth-orbit-chip.chip-two {right:0;top:45%}
+.hi-cinema-auth-orbit-chip.chip-three {bottom:7px;left:7%}
+.hi-cinema-auth-trust {display:flex;align-items:center;gap:9px;color:#b7a59b;font-size:12px}
+.hi-cinema-auth-trust svg {color:var(--auth-orange)}
+.hi-cinema-auth-card {min-width:0;padding:clamp(24px,3vw,45px);background:linear-gradient(148deg,#1c130f,#111011 75%);
+  border:1px solid rgba(255,118,29,.47);border-radius:20px;
+  box-shadow:0 38px 85px rgba(0,0,0,.47),inset 0 1px rgba(255,188,120,.08)}
+.hi-cinema-auth-card-top {display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:23px}
+.hi-cinema-auth-card-icon {display:grid;place-items:center;width:49px;height:49px;border-radius:13px;
+  background:rgba(255,107,19,.12);color:var(--auth-orange);border:1px solid rgba(255,107,19,.38)}
+.hi-cinema-auth-card-number {color:#ac9181;font-size:10px;letter-spacing:.19em;font-weight:750}
+.hi-cinema-auth-tabs {display:grid;grid-template-columns:1fr 1fr;background:#0a0909;
+  border:1px solid #513021;padding:4px;border-radius:10px;gap:5px;margin-bottom:28px}
+.hi-cinema-auth-tabs button {border:0;background:transparent;color:#bbaaa0;border-radius:7px;
+  padding:12px 8px;cursor:pointer;font-size:13px;font-weight:800}
+.hi-cinema-auth-tabs button.active {background:#ff6b13;color:#130802;box-shadow:0 3px 16px rgba(255,91,0,.17)}
+.hi-cinema-auth-card h2 {font:900 clamp(30px,3.2vw,47px)/1 Impact,"Arial Narrow",sans-serif;
+  letter-spacing:.005em;margin:0 0 14px;color:#fff}
+.hi-cinema-auth-subtitle {color:#c0aea3;font-size:13px;line-height:1.7;margin:0 0 27px}
+.hi-cinema-auth-card form {width:100%;display:grid;gap:17px}
+.hi-cinema-auth-card .field {display:grid;gap:8px;color:#e5d5ca}
+.hi-cinema-auth-card .field label,.hi-cinema-auth-card label {color:#decabc;font-size:12px;font-weight:650}
+.hi-cinema-auth-card input:not([type="checkbox"]),.hi-cinema-auth-card select {display:block;width:100%;min-height:50px;
+  background:#0c0b0c!important;color:#f9f1e9!important;border:1px solid #63412c!important;
+  border-radius:9px!important;padding:11px 14px;font-size:14px}
+.hi-cinema-auth-card input::placeholder {color:#807269!important}
+.hi-cinema-auth-card input:focus {outline:2px solid #ff8a3c!important;outline-offset:2px;border-color:var(--auth-orange)!important}
+.hi-cinema-auth-card form .button,.hi-cinema-auth-card form button[type="submit"] {width:100%;min-height:52px;
+  display:flex;align-items:center;justify-content:center;border-radius:9px!important;
+  background:#ff6b13!important;border:1px solid #ff9c4d!important;color:#160a04!important;
+  font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 5px 25px rgba(255,91,0,.2)}
+.hi-cinema-auth-card form .button:hover:not(:disabled),.hi-cinema-auth-card form button[type="submit"]:hover:not(:disabled) {background:#ff9239!important}
+.hi-cinema-auth-card .error,.hi-cinema-auth-card [role="alert"] {background:#481410!important;color:#ffe9e2!important;border:1px solid #e45135!important;border-radius:9px;padding:11px}
+.hi-cinema-auth-switch {margin:27px 0 0;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;
+  font-size:12px;color:#bfaea3}
+.hi-cinema-auth-switch button {display:inline-flex;align-items:center;gap:6px;background:transparent;border:0;
+  color:#ff9b55;font-weight:900;cursor:pointer;padding:5px}
+.hi-cinema-auth-switch button:hover {color:#fff}
+.hi-cinema-auth-secure {display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+  border-top:1px solid rgba(255,151,75,.12);padding-top:22px;margin-top:20px;font-size:10px;color:#a89081}
+.hi-cinema-auth-secure svg {color:#ff8a3d}
+.hi-cinema-auth-secure span {color:#ff6b13}
+.hi-cinema-auth-footer {max-width:1500px;margin:auto;border-top:1px solid rgba(255,130,46,.16);
+  padding:20px clamp(20px,5vw,85px);display:flex;justify-content:space-between;gap:20px;
+  color:#9c8b82;font-size:11px;line-height:1.6}
+@media (max-width:1020px) {
+  .hi-cinema-auth-main {grid-template-columns:1fr;max-width:720px;padding-top:36px}
+  .hi-cinema-auth-story {text-align:center}
+  .hi-cinema-auth-story > p {margin-left:auto;margin-right:auto}
+  .hi-cinema-auth-orbit {margin:6px auto}
+  .hi-cinema-auth-kicker,.hi-cinema-auth-trust {justify-content:center}
+}
+@media (max-width:600px) {
+  .hi-cinema-auth-header {min-height:75px;padding:12px 19px}
+  .hi-cinema-auth-monogram {width:48px;height:47px;font-size:24px}
+  .hi-cinema-auth-brand-copy b {font-size:14px}
+  .hi-cinema-auth-brand-copy small {font-size:7px;letter-spacing:.12em}
+  .hi-cinema-auth-home {font-size:0;padding:9px}
+  .hi-cinema-auth-home svg {width:18px;height:18px}
+  .hi-cinema-auth-main {padding:31px 17px 45px;gap:25px}
+  .hi-cinema-auth-story h1 {font-size:clamp(51px,13vw,74px);margin:20px 0 14px}
+  .hi-cinema-auth-story > p {font-size:13px}
+  .hi-cinema-auth-orbit {height:215px}
+  .hi-cinema-auth-ring {width:185px;height:185px}
+  .hi-cinema-auth-ring.ring-two {width:235px;height:235px}
+  .hi-cinema-auth-orbit-center {width:105px;height:105px;border-radius:23px}
+  .hi-cinema-auth-orbit-center > span {font-size:56px}
+  .hi-cinema-auth-orbit-chip {font-size:8px;padding:8px}
+  .hi-cinema-auth-orbit-chip svg {width:12px}
+  .hi-cinema-auth-card {padding:24px 18px}
+  .hi-cinema-auth-footer {flex-direction:column;font-size:9px;padding:18px}
+}
+@media (prefers-reduced-motion: reduce) {
+  .hi-cinema-auth * {transition:none!important;animation:none!important}
+}

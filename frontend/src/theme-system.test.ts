@@ -17,13 +17,14 @@ describe("INFOTEX HI theme system", () => {
     document.documentElement.style.colorScheme = "";
   });
 
-  it("uses Blue Glass as the default theme", () => {
-    expect(DEFAULT_THEME).toBe("blue");
-    expect(readSavedTheme()).toBe("blue");
+  it("uses Cinematic Orange as the default theme", () => {
+    expect(DEFAULT_THEME).toBe("orange");
+    expect(readSavedTheme()).toBe("orange");
   });
 
-  it("recognizes all five supported themes", () => {
+  it("recognizes all six supported themes", () => {
     expect(THEME_IDS).toEqual([
+      "orange",
       "blue",
       "chocolate",
       "noir",
@@ -44,7 +45,7 @@ describe("INFOTEX HI theme system", () => {
       "invalid-theme"
     );
 
-    expect(readSavedTheme()).toBe("blue");
+    expect(readSavedTheme()).toBe("orange");
   });
 
   it("saves and restores the selected theme", () => {

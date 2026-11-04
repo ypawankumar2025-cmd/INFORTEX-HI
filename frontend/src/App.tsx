@@ -1,3 +1,5 @@
+import HeroMotion from "./HeroMotion";
+import CinematicOverview from "./components/CinematicOverview";
 import { useEffect, useState, useCallback, type ReactNode } from "react";
 import {
   LayoutDashboard,
@@ -457,6 +459,17 @@ export default function App() {
             </button>
           }
         />
+        {theme === "orange" ? (
+          <CinematicOverview
+            projectCount={projects.length}
+            completedTasks={Number(analytics.tasks?.find((x: Row) => x.status === "done")?.count || 0)}
+            agentExecutions={analytics.agents?.reduce((sum: number, item: Row) => sum + Number(item.executions || 0), 0) || 0}
+            memberCount={members.length}
+            agentStates={agents.map((item: Row) => ({ id: String(item.id), enabled: item.enabled === "1" }))}
+            onNavigate={navigate}
+          />
+        ) : (
+          <>
         <div className={`welcome-banner hi-theme-hero hi-hero-${theme}`}>
           <div className="hi-hero-copy">
             <Badge tone="blue"><Sparkles size={12} /> HUMAN + AI · BETTER TOGETHER</Badge>
@@ -473,6 +486,7 @@ export default function App() {
             {theme === "sage" && <><div className="hi-terrarium"><div className="hi-terrarium-leaf leaf-one"/><div className="hi-terrarium-leaf leaf-two"/><div className="hi-terrarium-leaf leaf-three"/><div className="hi-terrarium-leaf leaf-four"/><div className="hi-terrarium-stem"/><div className="hi-terrarium-ground"/></div><span className="hi-sage-slogan">Grow ideas<br/>with intention.</span></>}
           </div>
         </div>
+         <HeroMotion />
         <div className="stats-grid">
           <Stat
             label="Projects"
@@ -502,6 +516,8 @@ export default function App() {
             detail="People thinking together"
           />
         </div>
+          </>
+        )}
         <div className="two-column">
           <Panel
             title="Your projects"

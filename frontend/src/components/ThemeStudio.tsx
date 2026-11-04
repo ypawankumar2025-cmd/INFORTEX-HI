@@ -10,7 +10,12 @@ const THEMES: {
   colors: readonly [string, string, string];
 }[] = [
   {
-    id: "blue", title: "Original Blue Glass", subtitle: "Your first favorite · Default",
+    id: "orange", title: "Cinematic Orange & Black", subtitle: "New default · Matches the cinematic homepage",
+    mood: "Deep cinematic black, electric orange highlights and warm cream accents",
+    colors: ["#080809", "#FF6B13", "#F0EEE8"],
+  },
+  {
+    id: "blue", title: "Original Blue Glass", subtitle: "Original classic · Still available",
     mood: "Cinematic navy, cobalt-blue glass, red neon accents, human × AI handshake",
     colors: ["#021861", "#255DCE", "#DE1110"],
   },
@@ -87,8 +92,8 @@ export default function ThemeStudio({ selected, onSelect }: {
       </div>
       <div className="hi-theme-bottom">
         <div><strong>No rebuild needed to switch.</strong><p>Selection is remembered in this browser, including after refresh.</p></div>
-        <button className="hi-theme-reset" type="button" onClick={() => onSelect("blue")} disabled={selected === "blue"}>
-          <RotateCcw size={16} /> Restore original blue
+        <button className="hi-theme-reset" type="button" onClick={() => onSelect("orange")} disabled={selected === "orange"}>
+          <RotateCcw size={16} /> Restore cinematic default
         </button>
       </div>
     </section>
