@@ -1,16 +1,23 @@
 #pragma once
 #include "agents.hpp"
 #include "knowledge.hpp"
+#include <functional>
 namespace hi {
 struct Identity {
   std::string id, name, email;
   bool admin = false;
 };
 class Service : public Repository {
+public:
+  using Mailer = std::function<void(const std::string&, const std::string&, const std::string&)>;
+private:
+  void sendOtp(const std::string&, const std::string&, const std::string&);
+  Json verifyChallenge(const std::string&, const std::string&, const std::string&, bool, const std::function<void(const Json&)>& = {});
   IntelligenceProvider &provider_;
   KnowledgeService knowledge_;
   AgentCommunicationManager communication_;
   ExecutionPipeline pipeline_;
+  Mailer mailer_;
   Json member(const Identity &, const std::string &workspace,
               bool write = false, bool manage = false);
   Json project(const Identity &, const std::string &project, bool write = false,
@@ -25,7 +32,11 @@ class Service : public Repository {
                  const std::string &project, const std::string &task);
 
 public:
-  Service(Database &, IntelligenceProvider &);
+  Service(Database &, IntelligenceProvider &, Mailer mailer = {});
+  Json verifyRegistration(const Json &);
+  Json forgotPassword(const Json &);
+  Json verifyResetCode(const Json &);
+  Json resetPassword(const Json &);
   Identity authenticate(const std::string &token);
   Json registerUser(const Json &);
   Json login(const Json &, std::string &token);

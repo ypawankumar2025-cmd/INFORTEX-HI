@@ -1,0 +1,8 @@
+/* Scoped additions only. Original robot portrait and page layout unchanged. */
+.hi-cinema-auth-card .hi-auth2-password-input {display:block;position:relative;}
+.hi-cinema-auth-card .hi-auth2-password-input input {padding-right:55px!important;}
+.hi-cinema-auth-card .hi-auth2-show {position:absolute;right:7px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#fba35b;padding:11px;cursor:pointer;z-index:2;}
+.hi-cinema-auth-card .hi-auth2-show:focus-visible,.hi-cinema-auth-card .hi-auth2-help button:focus-visible {outline:2px solid #ff8a3c;outline-offset:3px;}
+.hi-cinema-auth-card .hi-auth2-help {margin:13px 0 3px;color:#decabc;font-size:12px;line-height:1.7;}
+.hi-cinema-auth-card .hi-auth2-help button {border:0;background:transparent;color:#ffb16b;text-decoration:underline;cursor:pointer;padding:3px 2px;font-size:inherit;}
+.hi-cinema-auth-card .hi-auth2-notice {color:#c1f0ce;background:#11301b;border:1px solid #3b985b;padding:12px;border-radius:9px;margin:10px 0 15px;font-size:13px;}

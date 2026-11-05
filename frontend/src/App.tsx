@@ -1917,9 +1917,9 @@ export default function App() {
                 />
                 <Input
                   name="new_password"
-                  label="New password · 12+ characters"
+                  label="New password · minimum 6 characters"
                   type="password"
-                  minLength={12}
+                  minLength={6}
                 />
               </Form>
             </div>

@@ -224,6 +224,74 @@ int main(int argc, char **argv) {
   assert(projectService.handle(owner,"GET",{"chats"},Json::object()).empty());
   projectService.handle(owner,"DELETE",{"project-chats","test-project",projectChatId},Json::object());
   assert(db.query("SELECT id FROM project_chat_messages WHERE thread_id=?",{projectChatId}).empty());
+  // Authentication 2.0 tests use an injected mailer: no real emails or keys.
+  ::setenv("OTP_PEPPER", "local-unit-test-pepper-not-for-production-0123456789", 1);
+  Database authDb(":memory:");
+  std::ifstream authSchema(argv[1]);
+  authDb.script(std::string(std::istreambuf_iterator<char>(authSchema), {}));
+  std::string sentCode, sentMail, sentPurpose;
+  Service authService(authDb, p, [&](const std::string& mail,
+                                       const std::string& code,
+                                       const std::string& purpose) {
+    sentMail=mail; sentCode=code; sentPurpose=purpose;
+  });
+  auto pending=authService.registerUser({{"name","Test User"},
+                                         {"email","otp@example.test"},
+                                         {"password","abc123"}});
+  assert(pending["verification_required"] == true);
+  assert(sentPurpose=="register" && sentMail=="otp@example.test");
+  assert(sentCode.size()==6);
+  assert(authDb.query("SELECT id FROM users WHERE email=?",{"otp@example.test"}).empty());
+  const auto wrongCode = sentCode == "000000" ? "999999" : "000000";
+  bool badCode=false;
+  try { authService.verifyRegistration({{"email","otp@example.test"},{"code",wrongCode}}); }
+  catch(const Error& e) {badCode=(e.status==400);}
+  assert(badCode);
+  assert(authDb.query("SELECT attempts FROM auth_challenges WHERE email=?",
+                      {"otp@example.test"})[0]["attempts"]=="1");
+  assert(authService.verifyRegistration({{"email","otp@example.test"},{"code",sentCode}})["ok"]==true);
+  assert(!authDb.query("SELECT id FROM users WHERE email=?",{"otp@example.test"}).empty());
+  badCode=false;
+  try { authService.verifyRegistration({{"email","otp@example.test"},{"code",sentCode}}); }
+  catch(const Error& e) {badCode=(e.status==400);}
+  assert(badCode); // One-time code cannot be replayed.
+  std::string authToken;
+  auto identity=authService.login({{"email","otp@example.test"},{"password","abc123"}},authToken);
+  assert(identity["email"]=="otp@example.test");
+  assert(authService.authenticate(authToken).email=="otp@example.test");
+  sentCode.clear();
+  authService.forgotPassword({{"email","unknown@example.test"}});
+  assert(sentCode.empty()); // No user enumeration, no mail for nonexistent user.
+  authService.forgotPassword({{"email","otp@example.test"}});
+  assert(sentPurpose=="reset" && sentCode.size()==6);
+  assert(authService.verifyResetCode({{"email","otp@example.test"},{"code",sentCode}})["ok"]==true);
+  authService.resetPassword({{"email","otp@example.test"},{"code",sentCode},
+                             {"new_password","new123"}});
+  bool invalidOldSession=false;
+  try {authService.authenticate(authToken);} catch(const Error& e) {invalidOldSession=e.status==401;}
+  assert(invalidOldSession);
+  bool oldPasswordFails=false;
+  try {authService.login({{"email","otp@example.test"},{"password","abc123"}},authToken);}
+  catch(const Error& e) {oldPasswordFails=e.status==401;}
+  assert(oldPasswordFails);
+  authService.login({{"email","otp@example.test"},{"password","new123"}},authToken);
+  bool reused=false;
+  try {authService.resetPassword({{"email","otp@example.test"},{"code",sentCode},
+                                {"new_password","again12"}});}
+  catch(const Error& e) {reused=e.status==400;}
+  assert(reused);
+  authService.forgotPassword({{"email","otp@example.test"}});
+  const auto previousCode = sentCode;
+  assert(authService.forgotPassword({{"email","otp@example.test"}})["ok"]==true);
+  assert(sentCode==previousCode); // Cooldown sends no second email, no enumeration.
+  // Verify expiry and lockout are enforced by durable DB state.
+  authDb.query("UPDATE auth_challenges SET expires_at=? WHERE email=?",
+               {std::to_string(now()-1),"otp@example.test"});
+  bool expired=false;
+  try {authService.verifyResetCode({{"email","otp@example.test"},{"code",sentCode}});}
+  catch(const Error& e) {expired=e.status==400;}
+  assert(expired);
+  // Zero downstream runtime requirements for a new email provider in unit tests.
   std::cout << "Core tests passed: budget, vectors, agents, extraction, "
                "parameterization, transaction rollback\n";
 }

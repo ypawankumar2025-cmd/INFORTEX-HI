@@ -70,7 +70,7 @@ int main() {
           try {
             bool read = req.method == crow::HTTPMethod::GET;
             require(req.body.size() <= 3000000, "Request too large", 413);
-            bool auth = path == "auth/login" || path == "auth/register";
+            bool auth = path.starts_with("auth/");
             require(
                 limiter.allow(req.remote_ip_address + (auth ? ":auth" : ":api"),
                               auth ? 12 : 240),
@@ -89,6 +89,14 @@ int main() {
             auto method = crow::method_name(req.method);
             if (path == "auth/register" && req.method == crow::HTTPMethod::POST)
               return response(service.registerUser(in), 201);
+            if (path == "auth/verify-registration" && req.method == crow::HTTPMethod::POST)
+              return response(service.verifyRegistration(in));
+            if (path == "auth/forgot-password" && req.method == crow::HTTPMethod::POST)
+              return response(service.forgotPassword(in));
+            if (path == "auth/verify-reset-code" && req.method == crow::HTTPMethod::POST)
+              return response(service.verifyResetCode(in));
+            if (path == "auth/reset-password" && req.method == crow::HTTPMethod::POST)
+              return response(service.resetPassword(in));
             if (path == "auth/login" && req.method == crow::HTTPMethod::POST) {
               std::string token;
               auto r = response(service.login(in, token));

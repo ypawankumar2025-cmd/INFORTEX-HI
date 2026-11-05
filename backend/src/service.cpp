@@ -3,10 +3,99 @@
 #include "hi/routing.hpp"
 #include <iostream>
 #include <set>
+#include <algorithm>
+#include <utility>
+#include <curl/curl.h>
+#include <openssl/hmac.h>
+#include <cstdint>
+#include <limits>
 namespace hi {
-Service::Service(Database &db, IntelligenceProvider &p)
+namespace {
+constexpr long long kOtpLifetime = 300;
+constexpr long long kOtpCooldown = 60;
+constexpr int kMaxOtpAttempts = 5;
+
+std::string otpCode() {
+  // Rejection sampling avoids modulo bias; OpenSSL CSPRNG, not rand().
+  constexpr std::uint64_t range = std::uint64_t{1} << 32;
+  constexpr std::uint64_t limit = range - (range % 1000000);
+  std::uint32_t v = 0;
+  do {
+    if (RAND_bytes(reinterpret_cast<unsigned char *>(&v), sizeof(v)) != 1)
+      throw std::runtime_error("Random generator failure");
+  } while (v >= limit);
+  return std::to_string(1000000u + (v % 1000000u)).substr(1);
+}
+
+std::string otpHash(const std::string &challenge, const std::string &code) {
+  // Six digits are brute-forceable if SHA-256 alone is used. Server-side
+  // HMAC pepper stays outside the database and never goes to the browser.
+  auto pepper = env("OTP_PEPPER");
+  require(pepper.size() >= 32, "Email verification is not configured", 503);
+  auto message = challenge + ":" + code;
+  unsigned char out[EVP_MAX_MD_SIZE];
+  unsigned int len = 0;
+  if (!HMAC(EVP_sha256(), pepper.data(), static_cast<int>(pepper.size()),
+            reinterpret_cast<const unsigned char *>(message.data()),
+            message.size(), out, &len))
+    throw std::runtime_error("Verification hashing failed");
+  return hex(out, len);
+}
+
+void sendBrevoOtp(const std::string &mail, const std::string &code,
+                  const std::string &purpose) {
+  const auto key = env("BREVO_API_KEY"), sender = env("BREVO_SENDER_EMAIL");
+  require(!key.empty() && !sender.empty(),
+          "Verification email provider is not configured", 503);
+  const auto subject = purpose == "register" ? "Verify your INFORTEX HI account"
+                                                : "Reset your INFORTEX HI password";
+  const auto body = "Your INFORTEX HI verification code is " + code +
+                    ". It expires in 5 minutes. If you did not request this, ignore this message.";
+  const Json payload = {
+      {"sender", {{"name", "INFORTEX HI"}, {"email", sender}}},
+      {"to", Json::array({{{"email", mail}}})},
+      {"subject", subject}, {"textContent", body}};
+  const std::string content = payload.dump();
+  CURL *curl = curl_easy_init();
+  if (!curl) throw Error(503, "Email service unavailable; retry later");
+  struct curl_slist *headers = nullptr;
+  const std::string auth = "api-key: " + key;
+  headers = curl_slist_append(headers, "accept: application/json");
+  headers = curl_slist_append(headers, "content-type: application/json");
+  headers = curl_slist_append(headers, auth.c_str());
+  curl_easy_setopt(curl, CURLOPT_URL, "https://api.brevo.com/v3/smtp/email");
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(curl, CURLOPT_POST, 1L);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, content.c_str());
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(content.size()));
+  curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20L);
+  // Do not print provider response/body (could contain sensitive information).
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+                   +[](char *, size_t size, size_t nmemb, void *) -> size_t {
+                     return size * nmemb;
+                   });
+  const auto result = curl_easy_perform(curl);
+  long status = 0;
+  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
+  curl_slist_free_all(headers);
+  curl_easy_cleanup(curl);
+  require(result == CURLE_OK && status == 201,
+          "Verification email could not be sent; check your sender setup", 503);
+}
+
+void requireOtpFormat(const std::string &code) {
+  require(code.size() == 6 &&
+              std::all_of(code.begin(), code.end(), [](unsigned char c) {
+                return c >= '0' && c <= '9';
+              }),
+          "Enter the six-digit code");
+}
+} // namespace
+
+Service::Service(Database &db, IntelligenceProvider &p, Mailer mailer)
     : Repository(db), provider_(p), knowledge_(db, p), communication_(db),
-      pipeline_(2) {
+      pipeline_(2), mailer_(std::move(mailer)) {
   for (auto &name : AgentRegistry::ids()) {
     auto a = AgentFactory::create(name);
     db_.query("INSERT INTO agents(id,name,responsibility) VALUES(?,?,?) ON "
@@ -58,31 +147,147 @@ Identity Service::authenticate(const std::string &token) {
   return {text(r, "id"), text(r, "name"), text(r, "email"),
           text(r, "is_admin") == "1"};
 }
+void Service::sendOtp(const std::string &mail, const std::string &code,
+                      const std::string &purpose) {
+  if (mailer_) mailer_(mail, code, purpose);
+  else sendBrevoOtp(mail, code, purpose);
+}
+
 Json Service::registerUser(const Json &input) {
   auto mail = email(input), name = field(input, "name", 80),
        password = field(input, "password", 128);
-  require(password.size() >= 12,
-          "Use at least 12 characters for your password");
+  require(password.size() >= 6, "Use at least 6 characters for your password");
   auto salt = id(), hash = passwordHash(password, salt);
-  Transaction tx(db_);
-  require(db_.query("SELECT id FROM users WHERE email=?", {mail}).empty(),
-          "Email already registered", 409);
-  auto uid = id(), wid = id();
-  db_.query(
-      "INSERT INTO users(id,email,name,salt,password_hash,is_admin,created_at) "
-      "VALUES(?,?,?,?,?,?,?)",
-      {uid, mail, name, salt, hash,
-       mail == lower(env("ADMIN_EMAIL")) ? "1" : "0", std::to_string(now())});
-  db_.query(
-      "INSERT INTO workspaces(id,name,owner_id,created_at) VALUES(?,?,?,?)",
-      {wid, name + "'s workspace", uid, std::to_string(now())});
-  db_.query(
-      "INSERT INTO workspace_members(workspace_id,user_id,role) VALUES(?,?,?)",
-      {wid, uid, "owner"});
-  notify(uid, "Welcome to Human Intelligence. Create a project to begin.");
-  tx.commit();
-  return {{"id", uid}, {"email", mail}};
+  const auto challenge = id(), code = otpCode(), code_hash = otpHash(challenge, code);
+  const auto stamp = now();
+  {
+    Transaction tx(db_);
+    require(db_.query("SELECT id FROM users WHERE email=?", {mail}).empty(),
+            "Email already registered", 409);
+    auto recent = db_.query("SELECT sent_at FROM auth_challenges "
+                            "WHERE email=? AND kind='register'", {mail});
+    require(recent.empty() || now() - number(recent[0], "sent_at") >= kOtpCooldown,
+            "Please wait 60 seconds before requesting another code", 429);
+    db_.query("DELETE FROM auth_challenges WHERE expires_at<?", {std::to_string(now())});
+    db_.query("DELETE FROM auth_challenges WHERE email=? AND kind='register'", {mail});
+    db_.query("INSERT INTO auth_challenges"
+              "(id,email,kind,code_hash,expires_at,attempts,sent_at,name,salt,password_hash) "
+              "VALUES(?,?, 'register', ?,?,0,?,?,?,?)",
+              {challenge, mail, code_hash, std::to_string(stamp+kOtpLifetime),
+               std::to_string(stamp), name, salt, hash});
+    tx.commit();
+  }
+  try { sendOtp(mail, code, "register"); }
+  catch (...) {
+    db_.query("DELETE FROM auth_challenges WHERE id=?", {challenge});
+    throw;
+  }
+  return {{"verification_required", true}, {"email", mail}};
 }
+
+// A challenge may be attempted at most five times, including across requests.
+// Incorrect attempts MUST commit before an error is thrown, otherwise the
+// Transaction destructor would roll them back.
+Json Service::verifyChallenge(const std::string &mail, const std::string &code,
+                              const std::string &kind, bool consume,
+                              const std::function<void(const Json&)> &onVerified) {
+  requireOtpFormat(code);
+  Transaction tx(db_);
+  auto rows = db_.query("SELECT * FROM auth_challenges WHERE email=? AND kind=?",
+                        {mail, kind});
+  require(!rows.empty(), "Invalid or expired verification code", 400);
+  const auto row = rows[0];
+  const auto challenge = text(row, "id");
+  if (number(row, "expires_at") <= now() || number(row, "attempts") >= kMaxOtpAttempts) {
+    db_.query("DELETE FROM auth_challenges WHERE id=?", {challenge});
+    tx.commit();
+    throw Error(400, "Invalid or expired verification code");
+  }
+  if (!equalSecret(otpHash(challenge, code), text(row, "code_hash"))) {
+    db_.query("UPDATE auth_challenges SET attempts=attempts+1 WHERE id=?", {challenge});
+    tx.commit();
+    throw Error(400, "Invalid or expired verification code");
+  }
+  if (onVerified) onVerified(row);
+  if (consume) db_.query("DELETE FROM auth_challenges WHERE id=?", {challenge});
+  tx.commit();
+  return row;
+}
+
+Json Service::verifyRegistration(const Json &input) {
+  auto mail = email(input), code = field(input, "code", 6);
+  // Verify and activate account atomically, including one-time OTP removal.
+  verifyChallenge(mail, code, "register", true, [&](const Json &details) {
+    require(db_.query("SELECT id FROM users WHERE email=?", {mail}).empty(),
+            "Email already registered", 409);
+    const auto uid = id(), wid = id();
+    db_.query("INSERT INTO users(id,email,name,salt,password_hash,is_admin,created_at) "
+              "VALUES(?,?,?,?,?,?,?)",
+              {uid, mail, text(details,"name"), text(details,"salt"),
+               text(details,"password_hash"),
+               mail == lower(env("ADMIN_EMAIL")) ? "1" : "0", std::to_string(now())});
+    db_.query("INSERT INTO workspaces(id,name,owner_id,created_at) VALUES(?,?,?,?)",
+              {wid, text(details,"name")+"'s workspace", uid, std::to_string(now())});
+    db_.query("INSERT INTO workspace_members(workspace_id,user_id,role) VALUES(?,?,?)",
+              {wid,uid,"owner"});
+    notify(uid, "Welcome to Human Intelligence. Create a project to begin.");
+  });
+  return {{"ok",true}};
+}
+
+Json Service::forgotPassword(const Json &input) {
+  auto mail = email(input);
+  const auto ack = Json{{"ok",true}};
+  // Generic result avoids revealing whether an email has an account.
+  if (db_.query("SELECT id FROM users WHERE email=?", {mail}).empty()) return ack;
+  const auto challenge=id(), code=otpCode(), code_hash=otpHash(challenge,code);
+  const auto stamp=now();
+  {
+    Transaction tx(db_);
+    auto recent = db_.query("SELECT sent_at FROM auth_challenges "
+                            "WHERE email=? AND kind='reset'", {mail});
+    // Same generic success for existing and nonexistent emails; no
+    // account-enumerating 429 response on a known address.
+    if (!recent.empty() && now() - number(recent[0], "sent_at") < kOtpCooldown) {
+      tx.commit();
+      return ack;
+    }
+    db_.query("DELETE FROM auth_challenges WHERE expires_at<?", {std::to_string(now())});
+    db_.query("DELETE FROM auth_challenges WHERE email=? AND kind='reset'", {mail});
+    db_.query("INSERT INTO auth_challenges"
+              "(id,email,kind,code_hash,expires_at,attempts,sent_at) "
+              "VALUES(?,?,'reset',?, ?,0,?)",
+              {challenge,mail,code_hash,std::to_string(stamp+kOtpLifetime),std::to_string(stamp)});
+    tx.commit();
+  }
+  try { sendOtp(mail, code, "reset"); }
+  catch (...) {
+    db_.query("DELETE FROM auth_challenges WHERE id=?", {challenge});
+    throw;
+  }
+  return ack;
+}
+
+Json Service::verifyResetCode(const Json &input) {
+  verifyChallenge(email(input), field(input,"code",6), "reset", false);
+  return {{"ok", true}};
+}
+
+Json Service::resetPassword(const Json &input) {
+  auto mail=email(input), code=field(input,"code",6), password=field(input,"new_password",128);
+  require(password.size()>=6, "Use at least 6 characters for your password");
+  const auto salt=id(), hash=passwordHash(password,salt);
+  verifyChallenge(mail,code,"reset",true,[&](const Json&) {
+    auto users=db_.query("SELECT id FROM users WHERE email=?", {mail});
+    require(!users.empty(),"Invalid or expired verification code",400);
+    const auto uid=text(users[0],"id");
+    db_.query("UPDATE users SET salt=?,password_hash=? WHERE id=?", {salt,hash,uid});
+    db_.query("DELETE FROM sessions WHERE user_id=?", {uid});
+    db_.query("DELETE FROM auth_challenges WHERE email=? AND kind='register'", {mail});
+  });
+  return {{"ok",true}};
+}
+
 Json Service::login(const Json &input, std::string &token) {
   auto mail = email(input), password = field(input, "password", 128);
   auto rows = db_.query("SELECT * FROM users WHERE email=?", {mail});
@@ -654,7 +859,7 @@ Json Service::handle(const Identity &u, const std::string &method,
   if (a == "password" && post) {
     auto current = field(in, "current_password", 128),
          next = field(in, "new_password", 128);
-    require(next.size() >= 12, "Use at least 12 characters");
+    require(next.size() >= 6, "Use at least 6 characters");
     auto row = one("SELECT * FROM users WHERE id=?", {u.id});
     require(equalSecret(passwordHash(current, text(row, "salt")),
                         text(row, "password_hash")),
