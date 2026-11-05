@@ -80,8 +80,12 @@ void sendBrevoOtp(const std::string &mail, const std::string &code,
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
   curl_slist_free_all(headers);
   curl_easy_cleanup(curl);
-  require(result == CURLE_OK && status == 201,
-          "Verification email could not be sent; check your sender setup", 503);
+  if (result != CURLE_OK || status != 201) {
+    // Safe diagnostics: status codes only. NEVER log API key, emails, or OTP.
+    std::cerr << "HI_BREVO_DIAG http_status=" << status
+              << " curl_code=" << static_cast<int>(result) << '\n';
+    throw Error(503, "Verification email could not be sent; check your sender setup");
+  }
 }
 
 void requireOtpFormat(const std::string &code) {
