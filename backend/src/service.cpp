@@ -4,6 +4,7 @@
 #include <iostream>
 #include <set>
 #include <algorithm>
+#include <cctype>
 #include <utility>
 #include <curl/curl.h>
 #include <openssl/hmac.h>
@@ -70,20 +71,70 @@ void sendBrevoOtp(const std::string &mail, const std::string &code,
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(content.size()));
   curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20L);
-  // Do not print provider response/body (could contain sensitive information).
+  // Capture a bounded API error response for safe, redacted diagnostics.
+  std::string brevo_reply;
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-                   +[](char *, size_t size, size_t nmemb, void *) -> size_t {
-                     return size * nmemb;
+                   +[](char *buf, size_t size, size_t nmemb, void *p) -> size_t {
+                     const size_t n = size * nmemb;
+                     auto *reply = static_cast<std::string *>(p);
+                     if (reply->size() < 4096)
+                       reply->append(buf, std::min(n, size_t(4096) - reply->size()));
+                     return n;
                    });
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &brevo_reply);
   const auto result = curl_easy_perform(curl);
   long status = 0;
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
   curl_slist_free_all(headers);
   curl_easy_cleanup(curl);
   if (result != CURLE_OK || status != 201) {
-    // Safe diagnostics: status codes only. NEVER log API key, emails, or OTP.
+    // Only sanitized provider error fields may reach the log. NEVER log
+    // request headers, email content, raw response, API key, or OTP.
+    std::string brevo_code = "unknown", brevo_reason = "unknown";
+    try {
+      auto error = Json::parse(brevo_reply);
+      if (error.is_object()) {
+        if (error.contains("code") && error["code"].is_string()) {
+          const auto value = error["code"].get<std::string>();
+          if (value.size() <= 48 &&
+              std::all_of(value.begin(), value.end(), [](unsigned char c) {
+                return (c >= 'a' && c <= 'z') || c == '_';
+              })) brevo_code = value;
+        }
+        if (error.contains("message") && error["message"].is_string()) {
+          auto message = error["message"].get<std::string>();
+          std::transform(message.begin(), message.end(), message.begin(),
+                         [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+          if (message.find("sender") != std::string::npos ||
+              message.find("from address") != std::string::npos)
+            brevo_reason = "sender";
+          else if (message.find("recipient") != std::string::npos ||
+                   message.find("to address") != std::string::npos)
+            brevo_reason = "recipient";
+          else if (message.find("smtp") != std::string::npos ||
+                   message.find("activation") != std::string::npos ||
+                   message.find("account") != std::string::npos)
+            brevo_reason = "account";
+          else if (message.find("domain") != std::string::npos ||
+                   message.find("dkim") != std::string::npos)
+            brevo_reason = "domain";
+          else if (message.find("email") != std::string::npos)
+            brevo_reason = "email";
+          else if (message.find("content") != std::string::npos ||
+                   message.find("text") != std::string::npos)
+            brevo_reason = "content";
+          else if (message.find("parameter") != std::string::npos ||
+                   message.find("field") != std::string::npos)
+            brevo_reason = "parameter";
+          else
+            brevo_reason = "other";
+        }
+      }
+    } catch (...) { /* Non-JSON provider error: status remains useful. */ }
     std::cerr << "HI_BREVO_DIAG http_status=" << status
-              << " curl_code=" << static_cast<int>(result) << '\n';
+              << " curl_code=" << static_cast<int>(result)
+              << " brevo_code=" << brevo_code
+              << " reason=" << brevo_reason << '\n';
     throw Error(503, "Verification email could not be sent; check your sender setup");
   }
 }
