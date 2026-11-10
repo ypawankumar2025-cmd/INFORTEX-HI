@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Starts a disposable SQLite backend, tests it over HTTP, then removes test data."""
-import os,subprocess,tempfile,time,urllib.request
+import os,subprocess,tempfile,time,urllib.request,secrets
 from pathlib import Path
 root=Path(__file__).resolve().parent.parent
 binary=root/'build'/'hi_server'
 with tempfile.TemporaryDirectory(prefix='hi-tests-') as temp:
     env=os.environ.copy()
-    env.update(DATABASE_URL=str(Path(temp)/'test.db'),SCHEMA_PATH=str(root/'database'/'schema.sql'),PORT='18081',BIND_ADDRESS='127.0.0.1',AI_MODE='demo',ADMIN_EMAIL='')
+    mailbox=Path(temp)/'otp-mailbox.jsonl'
+    mailbox.touch(mode=0o600)
+    env.update(DATABASE_URL=str(Path(temp)/'test.db'),SCHEMA_PATH=str(root/'database'/'schema.sql'),PORT='18081',BIND_ADDRESS='127.0.0.1',AI_MODE='demo',ADMIN_EMAIL='',APP_ORIGIN='http://127.0.0.1:18081',COOKIE_SECURE='false',OTP_PEPPER=secrets.token_hex(32),HI_CI_TEST_MODE='1',HI_CI_OTP_FILE=str(mailbox))
     with open(Path(temp)/'server.log','w+') as log:
         server=subprocess.Popen([str(binary)],env=env,stdout=log,stderr=log)
         try:

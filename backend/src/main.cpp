@@ -3,6 +3,8 @@
 #include <curl/curl.h>
 #include <filesystem>
 #include <sstream>
+#include <fstream>
+#include <memory>
 using namespace hi;
 namespace {
 std::string sessionToken(const crow::request &req) {
@@ -49,6 +51,33 @@ crow::response response(const Json &j, int code = 200) {
   r.set_header("X-Content-Type-Options", "nosniff");
   return r;
 }
+// CI-only email sink: the test runner creates a disposable local file.
+// The live app still uses Brevo and must verify real user email addresses.
+Service::Mailer ciMailer() {
+  const auto mailbox = env("HI_CI_OTP_FILE");
+  if (mailbox.empty()) return {};
+  const auto origin = env("APP_ORIGIN");
+  require(env("HI_CI_TEST_MODE") == "1" &&
+              env("AI_MODE", "demo") == "demo" &&
+              env("ADMIN_EMAIL").empty() &&
+              env("COOKIE_SECURE", "false") == "false" &&
+              (origin.starts_with("http://127.0.0.1:") ||
+               origin.starts_with("http://localhost:")),
+          "Unsafe CI email test configuration", 500);
+  auto gate = std::make_shared<std::mutex>();
+  return [mailbox, gate](const std::string &mail, const std::string &code,
+                         const std::string &purpose) {
+    require(mail.ends_with("@example.test"),
+            "CI email sink only accepts disposable example.test addresses", 400);
+    std::lock_guard<std::mutex> lock(*gate);
+    std::ofstream out(mailbox, std::ios::app);
+    if (!out) throw Error(503, "CI email sink unavailable");
+    out << Json{{"email", mail}, {"code", code}, {"purpose", purpose}}.dump()
+        << '\n';
+    out.flush();
+    if (!out) throw Error(503, "CI email sink write failed");
+  };
+}
 } // namespace
 int main() {
   try {
@@ -59,7 +88,7 @@ int main() {
     Database db(env("DATABASE_URL", "hi.db"));
     db.script(std::string(std::istreambuf_iterator<char>(file), {}));
     auto provider = makeProvider();
-    Service service(db, *provider);
+    Service service(db, *provider, ciMailer());
     RateLimiter limiter;
     crow::SimpleApp app;
     CROW_ROUTE(app, "/api/<path>")
