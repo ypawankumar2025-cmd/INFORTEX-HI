@@ -3,6 +3,16 @@
 import base64, http.cookiejar, json, os, time, urllib.request, urllib.error, uuid, io, zipfile
 BASE=os.environ.get('HI_TEST_URL','http://127.0.0.1:8081')+'/api/'
 checks=0
+# Integration tests read OTPs only from the disposable file supplied by their
+# runner. No fixed OTP, production bypass or real email provider is needed.
+def test_otp(email, purpose):
+    mailbox=os.environ.get('HI_CI_OTP_FILE')
+    assert os.environ.get('HI_CI_TEST_MODE') == '1' and mailbox, 'CI OTP mailbox not configured'
+    with open(mailbox, encoding='utf-8') as stream:
+        records=[json.loads(line) for line in stream if line.strip()]
+    matching=[r for r in records if r['email']==email and r['purpose']==purpose]
+    assert matching, f'CI OTP not delivered for {purpose}'
+    return matching[-1]['code']
 class Client:
     def __init__(self):
         self.jar=http.cookiejar.CookieJar(); self.http=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(self.jar))
@@ -21,7 +31,10 @@ suffix=uuid.uuid4().hex[:10]; password='A-long-test-password-2026!'
 a,b=Client(),Client()
 for client,name in [(a,'Owner'),(b,'Other')]:
     client.mail=f'{name.lower()}-{suffix}@example.test'
-    client.call('auth/register','POST',{'name':name,'email':client.mail,'password':password},201)
+    pending=client.call('auth/register','POST',{'name':name,'email':client.mail,'password':password},201)
+    assert pending['verification_required'] is True and pending['email']==client.mail
+    client.call('auth/login','POST',{'email':client.mail,'password':password},401)
+    client.call('auth/verify-registration','POST',{'email':client.mail,'code':test_otp(client.mail,'register')})
     client.me=client.call('auth/login','POST',{'email':client.mail,'password':password})
 w=a.call('workspaces')[0]['id']
 p=a.call(f'workspaces/{w}/projects','POST',{'name':'Event test','description':'Integration workflow'})['id']
