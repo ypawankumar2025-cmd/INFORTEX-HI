@@ -15,6 +15,7 @@ import socket
 import urllib.request
 import http.cookiejar
 import base64
+import secrets
 
 root = Path(__file__).resolve().parents[1]
 state = {'scenario': 'normal', 'requests': 0, 'contexts': []}
@@ -90,24 +91,59 @@ with tempfile.TemporaryDirectory(prefix='hi-tls-') as temp:
         state.update(scenario='workflow', requests=0)
         with socket.socket() as sock:
             sock.bind(('127.0.0.1', 0)); port = sock.getsockname()[1]
-        appenv = {**env, 'AI_MODE': 'live', 'LLM_STREAMING': 'true', 'PORT': str(port), 'BIND_ADDRESS': '127.0.0.1', 'DATABASE_URL': str(Path(temp)/'workflow.db'), 'SCHEMA_PATH': str(root/'database/schema.sql'), 'ADMIN_EMAIL': '', 'COOKIE_SECURE': 'false'}
+        appenv = {**env, 'AI_MODE': 'live', 'LLM_STREAMING': 'true', 'PORT': str(port), 'BIND_ADDRESS': '127.0.0.1', 'DATABASE_URL': str(Path(temp)/'workflow.db'), 'SCHEMA_PATH': str(root/'database/schema.sql'), 'ADMIN_EMAIL': '', 'COOKIE_SECURE': 'false', 'APP_ORIGIN': f'http://127.0.0.1:{port}', 'OTP_PEPPER': secrets.token_hex(32)}
+        # Never expose the CI OTP mailbox to the live-provider process.
+        appenv.pop('HI_CI_TEST_MODE', None)
+        appenv.pop('HI_CI_OTP_FILE', None)
         client = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
         def api(path, body=None):
             req = urllib.request.Request(f'http://127.0.0.1:{port}/api/'+path, data=None if body is None else json.dumps(body).encode(), headers={'Content-Type': 'application/json', 'X-HI-Request': '1'})
             with client.open(req, timeout=5) as response:
                 return json.load(response)
         with open(Path(temp)/'backend.log', 'w') as log:
+            credentials = {'email': 'fixture@example.test', 'password': 'Local-test-only-7392!', 'name': 'Fixture'}
+            mailbox = Path(temp)/'otp-mailbox.jsonl'
+            mailbox.touch(mode=0o600)
+            # Seed a verified user using the already-guarded demo-only CI mailer.
+            # Stop that process before exercising the real live-provider workflow.
+            bootstrap_env = {**appenv, 'AI_MODE': 'demo', 'HI_CI_TEST_MODE': '1', 'HI_CI_OTP_FILE': str(mailbox)}
+            bootstrap = subprocess.Popen([str(root/'build/hi_server')], env=bootstrap_env, stdout=log, stderr=log)
+            try:
+                for attempt in range(50):
+                    try:
+                        if api('health')['mode'] == 'demo':
+                            break
+                    except OSError:
+                        if bootstrap.poll() is not None:
+                            raise RuntimeError('Demo bootstrap backend exited during startup')
+                        time.sleep(.1)
+                else:
+                    raise RuntimeError('Demo bootstrap backend did not start')
+                pending = api('auth/register', credentials)
+                assert pending['verification_required'] is True, pending
+                with mailbox.open(encoding='utf-8') as stream:
+                    messages = [json.loads(line) for line in stream if line.strip()]
+                codes = [m['code'] for m in messages if m.get('email') == credentials['email'] and m.get('purpose') == 'register']
+                assert len(codes) == 1, 'Disposable OTP mailbox did not receive registration code'
+                assert api('auth/verify-registration', {'email': credentials['email'], 'code': codes[0]})['ok'] is True
+                print('PASS: verified disposable fixture account with CI-only demo mailbox')
+            finally:
+                bootstrap.terminate()
+                bootstrap.wait(timeout=10)
+            # The live test runs with the ordinary mailer, no OTP bypass or CI sink.
             app = subprocess.Popen([str(root/'build/hi_server')], env=appenv, stdout=log, stderr=log)
             try:
                 for attempt in range(50):
                     try:
-                        assert api('health')['mode'] == 'live'; break
+                        if api('health')['mode'] == 'live':
+                            break
                     except OSError:
+                        if app.poll() is not None:
+                            raise RuntimeError('Live fixture backend exited during startup')
                         time.sleep(.1)
                 else:
                     raise RuntimeError('Live fixture backend did not start')
-                credentials = {'email': 'fixture@example.test', 'password': 'Local-test-only-7392!', 'name': 'Fixture'}
-                api('auth/register', credentials); api('auth/login', credentials)
+                api('auth/login', credentials)
                 workspace = api('workspaces')[0]['id']
                 project = api(f'workspaces/{workspace}/projects', {'name': 'Live fixture'})['id']
                 api(f'projects/{project}/documents', {'name': 'context.txt', 'base64': base64.b64encode(b'Fixture evidence for a task.').decode()})
