@@ -19,23 +19,26 @@ origin = f'http://127.0.0.1:{port}'
 with tempfile.TemporaryDirectory(prefix='hi-compose-') as temp:
     config = Path(temp) / '.env'
     config.write_text(f'DB_PASSWORD={secrets.token_hex(24)}\nAI_MODE=demo\nADMIN_EMAIL=\nAPP_ORIGIN={origin}\nHI_HTTP_PORT={port}\nCOOKIE_SECURE=false\nLLM_API_KEY=\nBRAVE_SEARCH_API_KEY=\nLLM_STREAMING=false\n')
-    # Bind only a disposable test mailbox into the backend container. Test OTP
-    # codes never appear in application logs or on a public endpoint.
-    mailbox = Path(temp) / 'otp-mailbox.jsonl'
-    mailbox.touch()
-    mailbox.chmod(0o666)  # allow the non-root container user to append
+    # Mount a disposable writable DIRECTORY, not a host-created mailbox file.
+    # The backend runs as a non-root user and creates the JSONL file itself.
+    # This avoids single-file bind-mount and /tmp overlay permission issues.
+    mailbox_dir = Path(temp) / 'ci-otp-mailbox'
+    mailbox_dir.mkdir()
+    mailbox_dir.chmod(0o777)  # isolated, unguessable temporary test directory
+    mailbox = mailbox_dir / 'otp-mailbox.jsonl'
     override = Path(temp) / 'ci-mailbox.compose.yml'
     override.write_text(
         'services:\n'
         '  backend:\n'
         '    environment:\n'
         '      HI_CI_TEST_MODE: "1"\n'
-        '      HI_CI_OTP_FILE: "/tmp/hi-ci-otp-mailbox.jsonl"\n'
+        '      HI_CI_OTP_FILE: "/hi-ci-otp-mailbox/otp-mailbox.jsonl"\n'
         f'      OTP_PEPPER: {secrets.token_hex(32)}\n'
         '    volumes:\n'
         '      - type: bind\n'
-        f'        source: {mailbox.as_posix()}\n'
-        '        target: /tmp/hi-ci-otp-mailbox.jsonl\n',
+        f'        source: {mailbox_dir.as_posix()}\n'
+        '        target: /hi-ci-otp-mailbox\n'
+        '        read_only: false\n',
         encoding='utf-8',
     )
     env = dict(os.environ)
@@ -59,6 +62,11 @@ with tempfile.TemporaryDirectory(prefix='hi-compose-') as temp:
     try:
         compose('up', '-d', '--build', '--wait', '--wait-timeout', '180')
         ready()
+        # Verify permissions as the backend container's configured user,
+        # before any API registration request or OTP generation takes place.
+        subprocess.run(command + ['exec', '-T', 'backend', 'sh', '-c',
+                        ': > /hi-ci-otp-mailbox/.probe && rm /hi-ci-otp-mailbox/.probe'],
+                       cwd=root, env=env, check=True)
         subprocess.run([sys.executable, str(root / 'scripts/integration_test.py')], env={**env, 'HI_TEST_URL': origin, 'HI_CI_TEST_MODE': '1', 'HI_CI_OTP_FILE': str(mailbox)}, check=True)
         compose('restart', 'backend')
         ready()
